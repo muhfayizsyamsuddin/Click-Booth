@@ -4,8 +4,11 @@ import errorHandler from "@/helpers/errHandler";
 import { v2 as cloudinary } from "cloudinary";
 import type { UploadApiResponse } from "cloudinary";
 import { PhotoModel } from "@/db/models/PhotoModel";
+import { UserModel } from "@/db/models/UserModel";
 import streamifier from "streamifier";
 import { fileTypeFromBuffer } from "file-type";
+import { sendWhatsapp } from "@/helpers/fonnte";
+import { ObjectId } from "mongodb";
 
 const CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME;
 const CLOUD_API_KEY = process.env.CLOUDINARY_API_KEY;
@@ -51,6 +54,7 @@ export async function POST(req: Request) {
   try {
     const userId = req.headers.get("x-user-id") ?? "";
     const body = (await req.json()) as UploadBody;
+
     if (!body?.imageData)
       throw { message: "imageData (base64 or data URI) is required", status: 400 };
 
@@ -67,6 +71,7 @@ export async function POST(req: Request) {
     if (!cloudinaryConfigured)
       throw { message: "Cloudinary not configured on server", status: 500 };
 
+    //decode image
     const dataUri = normalizeDataUri(body.imageData);
     const match = dataUri.match(/^data:(image\/\w+);base64,([\s\S]+)$/);
     if (!match) throw { message: "Invalid image data URI", status: 400 };
@@ -88,6 +93,7 @@ export async function POST(req: Request) {
     const MAX_BYTES = 5 * 1024 * 1024;
     if (buffer.length > MAX_BYTES) throw { message: "Image too large", status: 413 };
 
+    // upload ke cloudinary
     const uploadResult = await uploadBufferToCloudinary(buffer, {
       folder: "click-booth",
       resource_type: "image",
@@ -97,9 +103,11 @@ export async function POST(req: Request) {
 
     if (!uploadResult?.secure_url)
       throw { message: "Cloudinary did not return secure_url", status: 502 };
+
     const url = uploadResult.secure_url;
     const publicId = uploadResult.public_id;
 
+    //simpan ke DB
     const created: Photo = await PhotoModel.createPhoto({
       userId: userId || null,
       url,
@@ -111,11 +119,49 @@ export async function POST(req: Request) {
       aiEnhanced: false
     });
 
+    //share ke WhatsApp via fonnte
+    let waResult: any = null;
+    if (body.sendToWhatsapp) {
+      try {
+        let phoneNumber = body.phoneNumber;
+
+        if (!phoneNumber && userId) {
+          try {
+            const col = UserModel.collection();
+            let user: any = null;
+            // try ObjectId lookup first
+            try {
+              user = await col.findOne({ _id: new ObjectId(userId) });
+            } catch {
+              user = await col.findOne({ _id: new ObjectId(userId) });
+            }
+            if (user?.phoneNumber) phoneNumber = String(user.phoneNumber);
+          } catch (uErr) {
+            console.warn("Failed to lookup user phone:", uErr);
+          }
+        }
+
+        if (phoneNumber) {
+          waResult = await sendWhatsapp(
+            phoneNumber,
+            `Halo! Ini hasil foto kamu dari ClickBooth \n${url}`
+          );
+        } else {
+          waResult = { error: "No phone number found for user" };
+          console.warn("[photos.route] sendToWhatsapp requested but no phone available");
+        }
+      } catch (waErr) {
+        console.error("WA send error:", waErr);
+        waResult = { error: waErr instanceof Error ? waErr.message : String(waErr) };
+      }
+    }
+
     const waShareUrl = userId
       ? `https://wa.me/?text=${encodeURIComponent(`Check out my photo: ${url}`)}`
       : null;
+
     return NextResponse.json(
-      { message: "Photo uploaded and saved", photo: created, waShareUrl },
+      { message: "Photo uploaded and saved", photo: created, waShareUrl, waResult },
       { status: 201 }
     );
   } catch (error) {

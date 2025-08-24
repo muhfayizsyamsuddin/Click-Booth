@@ -19,6 +19,8 @@ export type UploadBody = {
   stickers?: string[];
   watermark?: string;
   downloadOnly?: boolean;
+  sendToWhatsapp?: boolean;
+  phoneNumber?: string | null;
 };
 
 export interface UserType {
