@@ -53,7 +53,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     }
 
     const body = await req.json();
-    const allowedKeys = new Set(["frame", "stickers", "watermark"]);
+    const allowedKeys = new Set(["frame", "stickers", "watermark", "filter", "shots", "layout"]);
     const payload: Record<string, unknown> = {};
     for (const key of Object.keys(body || {})) {
       if (allowedKeys.has(key)) payload[key] = body[key];

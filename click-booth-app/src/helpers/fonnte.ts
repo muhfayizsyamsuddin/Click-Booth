@@ -9,7 +9,8 @@ export async function sendWhatsapp(target: string, message: string) {
       "Content-Type": "application/x-www-form-urlencoded"
     },
     body: new URLSearchParams({
-      target
+      target,
+      message
     })
   });
 

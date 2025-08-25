@@ -12,6 +12,9 @@ function mapDocToPhoto(doc: PhotoDoc): Photo {
     frame: doc.frame,
     stickers: doc.stickers ?? [],
     watermark: doc.watermark,
+    filter: doc.filter ?? null,
+    shots: doc.shots ?? null,
+    layout: doc.layout ?? null,
     enhancedUrl: doc.enhancedUrl,
     aiEnhanced: doc.aiEnhanced ?? false,
     createdAt: doc.createdAt,
@@ -55,6 +58,9 @@ export class PhotoModel {
       frame: input.frame ?? "",
       stickers: input.stickers ?? [],
       watermark: input.watermark ?? "",
+      filter: input.filter ?? null,
+      shots: typeof input.shots === "number" ? input.shots : null,
+      layout: input.layout ?? null,
       enhancedUrl: input.enhancedUrl ?? input.url,
       aiEnhanced: input.aiEnhanced ?? false,
       createdAt: now,
@@ -140,6 +146,9 @@ export class PhotoModel {
       watermark: string;
       enhancedUrl: string;
       aiEnhanced: boolean;
+      filter: string | null;
+      shots: number | null;
+      layout: string | null;
     }>
   ): Promise<Photo | null> {
     try {
@@ -152,7 +161,9 @@ export class PhotoModel {
       if (payload.watermark !== undefined) updateFields.watermark = payload.watermark;
       if (payload.enhancedUrl !== undefined) updateFields.enhancedUrl = payload.enhancedUrl;
       if (payload.aiEnhanced !== undefined) updateFields.aiEnhanced = payload.aiEnhanced;
-
+      if (payload.filter !== undefined) updateFields.filter = payload.filter;
+      if (payload.shots !== undefined) updateFields.shots = payload.shots;
+      if (payload.layout !== undefined) updateFields.layout = payload.layout;
       // perform update then fetch the updated document to avoid ambiguous driver return types
       const res = await this.collection().updateOne({ _id }, { $set: updateFields });
       if (res.matchedCount === 0) return null;

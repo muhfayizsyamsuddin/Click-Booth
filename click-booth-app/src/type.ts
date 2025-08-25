@@ -11,6 +11,9 @@ export type NewPhotoInput = {
   watermark?: string;
   enhancedUrl?: string;
   aiEnhanced?: boolean;
+  filter?: string;
+  shots?: number;
+  layout?: string | null;
 };
 
 export type UploadBody = {
@@ -21,6 +24,9 @@ export type UploadBody = {
   downloadOnly?: boolean;
   sendToWhatsapp?: boolean;
   phoneNumber?: string | null;
+  filter?: string | null;
+  shots?: number | null;
+  layout?: string | null;
 };
 
 export interface UserType {
@@ -46,6 +52,9 @@ export interface Photo {
   watermark?: string;
   enhancedUrl?: string;
   aiEnhanced?: boolean;
+  filter?: string | null;
+  shots?: number | null;
+  layout?: string | null;
   createdAt: Date;
   updatedAt?: Date;
 }
@@ -61,6 +70,9 @@ export interface PhotoDoc {
   watermark?: string;
   enhancedUrl?: string;
   aiEnhanced?: boolean;
+  filter?: string | null;
+  shots?: number | null;
+  layout?: string | null;
   createdAt: Date;
   updatedAt?: Date;
 }
