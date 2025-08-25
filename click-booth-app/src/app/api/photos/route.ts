@@ -115,6 +115,9 @@ export async function POST(req: Request) {
       frame: body.frame,
       stickers: body.stickers,
       watermark: body.watermark,
+      filter: body.filter ?? undefined,
+      shots: typeof body.shots === "number" ? body.shots : undefined,
+      layout: body.layout ?? undefined,
       enhancedUrl: url,
       aiEnhanced: false
     });
