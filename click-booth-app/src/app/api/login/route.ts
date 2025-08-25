@@ -30,9 +30,11 @@ export async function POST(req: Request) {
     }
 
     // generate token
+
     const token = signToken({
       id: (user as any)._id?.toString() ?? (user as any).id ?? "",
       email: user.email,
+      role: user.role,
     });
 
     // set cookie

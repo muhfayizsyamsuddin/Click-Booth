@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import * as jose from "jose";
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
-const signToken = (payload: { email: string; id: string }) => {
+const signToken = (payload: { email: string; id: string; role: string }) => {
   return jwt.sign(payload, JWT_SECRET);
 };
 
