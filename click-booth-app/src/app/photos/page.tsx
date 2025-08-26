@@ -13,6 +13,7 @@ import {
   ExternalLink,
   AlertTriangle,
 } from "lucide-react";
+import Footer from "@/components/Footer";
 
 type PhotoItem = {
   _id: string;
@@ -96,29 +97,29 @@ export default function PhotosPage() {
   };
 
   return (
-    <div className="min-h-screen bg-cream-100">
+    <div className="min-h-screen bg-amber-50">
       {/* Header */}
-      <div className="bg-white border-b border-charcoal-200 shadow-sm">
+      <div className="bg-white border-b border-amber-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-charcoal-900 flex items-center space-x-3">
-                <Camera className="w-8 h-8 text-coral-600" />
+              <h1 className="text-3xl font-bold text-slate-900 flex items-center space-x-3">
+                <Camera className="w-8 h-8 text-red-500" />
                 <span>My Photos</span>
               </h1>
-              <p className="text-charcoal-600 mt-1">
+              <p className="text-slate-600 mt-1">
                 Your photo collection from ClickBooth sessions
               </p>
             </div>
 
             {/* View Mode Toggle */}
-            <div className="flex items-center space-x-2 bg-cream-200 rounded-2xl p-1">
+            <div className="flex items-center space-x-2 bg-amber-200 rounded-2xl p-1">
               <button
                 onClick={() => setViewMode("grid")}
                 className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2 ${
                   viewMode === "grid"
-                    ? "bg-white text-charcoal-800 shadow-md"
-                    : "text-charcoal-600 hover:text-charcoal-800"
+                    ? "bg-white text-slate-800 shadow-md"
+                    : "text-slate-600 hover:text-slate-800"
                 }`}
               >
                 <Grid className="w-4 h-4" />
@@ -128,8 +129,8 @@ export default function PhotosPage() {
                 onClick={() => setViewMode("list")}
                 className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2 ${
                   viewMode === "list"
-                    ? "bg-white text-charcoal-800 shadow-md"
-                    : "text-charcoal-600 hover:text-charcoal-800"
+                    ? "bg-white text-slate-800 shadow-md"
+                    : "text-slate-600 hover:text-slate-800"
                 }`}
               >
                 <List className="w-4 h-4" />
@@ -152,29 +153,29 @@ export default function PhotosPage() {
 
         {loading && photos.length === 0 ? (
           <div className="text-center py-20">
-            <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-12 shadow-xl border border-peach-200/50 max-w-md mx-auto">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-warmRed-600 mx-auto mb-6"></div>
-              <h3 className="text-xl font-semibold text-charcoal-800 mb-2">
+            <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-12 shadow-xl border border-amber-200/50 max-w-md mx-auto">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mx-auto mb-6"></div>
+              <h3 className="text-xl font-semibold text-slate-800 mb-2">
                 Loading Photos...
               </h3>
-              <p className="text-charcoal-600">
+              <p className="text-slate-600">
                 Please wait while we fetch your memories
               </p>
             </div>
           </div>
         ) : !loading && photos.length === 0 ? (
           <div className="text-center py-20">
-            <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-12 shadow-xl border border-peach-200/50 max-w-md mx-auto">
-              <Camera className="w-16 h-16 text-warmRed-600 mx-auto mb-6" />
-              <h3 className="text-2xl font-bold text-charcoal-800 mb-4">
+            <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-12 shadow-xl border border-amber-200/50 max-w-md mx-auto">
+              <Camera className="w-16 h-16 text-red-500 mx-auto mb-6" />
+              <h3 className="text-2xl font-bold text-slate-800 mb-4">
                 No Photos Yet
               </h3>
-              <p className="text-charcoal-600 mb-6">
+              <p className="text-slate-600 mb-6">
                 Start your first photo session to see your photos here
               </p>
               <a
                 href="/booth"
-                className="inline-flex items-center space-x-2 bg-warmRed-700 hover:bg-warmRed-800 text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="inline-flex items-center space-x-2 bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 <Camera className="w-5 h-5" />
                 <span>Take Your First Photo</span>
@@ -190,7 +191,7 @@ export default function PhotosPage() {
                   <div
                     key={photo._id}
                     onClick={() => setSelected(photo)}
-                    className="group bg-white/95 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg border border-peach-200/50 cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-xl"
+                    className="group bg-white/95 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg border border-amber-200/50 cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-xl"
                   >
                     <div className="aspect-square relative">
                       <Image
@@ -203,7 +204,7 @@ export default function PhotosPage() {
                       />
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 flex items-center justify-center">
                         <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                          <span className="bg-white/95 backdrop-blur-sm text-charcoal-800 px-3 py-1 rounded-full text-sm font-medium flex items-center space-x-1">
+                          <span className="bg-white/95 backdrop-blur-sm text-slate-800 px-3 py-1 rounded-full text-sm font-medium flex items-center space-x-1">
                             <Eye className="w-4 h-4" />
                             <span>View</span>
                           </span>
@@ -211,7 +212,7 @@ export default function PhotosPage() {
                       </div>
                     </div>
                     <div className="p-3">
-                      <p className="text-xs text-charcoal-500 truncate">
+                      <p className="text-xs text-slate-500 truncate">
                         {formatDate(photo.createdAt)}
                       </p>
                     </div>
@@ -223,7 +224,7 @@ export default function PhotosPage() {
                 {photos.map((photo) => (
                   <div
                     key={photo._id}
-                    className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg border border-peach-200/50 p-6 hover:shadow-xl transition-all duration-200"
+                    className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg border border-amber-200/50 p-6 hover:shadow-xl transition-all duration-200"
                   >
                     <div className="flex items-center space-x-6">
                       <div
@@ -243,10 +244,10 @@ export default function PhotosPage() {
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-charcoal-600 mb-2">
+                        <p className="text-sm text-slate-600 mb-2">
                           {formatDate(photo.createdAt)}
                         </p>
-                        <p className="text-xs text-charcoal-500 truncate">
+                        <p className="text-xs text-slate-500 truncate">
                           ID: {photo._id}
                         </p>
                       </div>
@@ -256,7 +257,7 @@ export default function PhotosPage() {
                           onClick={() =>
                             downloadPhoto(photo.url, `photo-${photo._id}.jpg`)
                           }
-                          className="bg-gray-100 hover:bg-gray-200 text-charcoal-700 p-2 rounded-xl transition-colors duration-200"
+                          className="bg-amber-100 hover:bg-amber-200 text-slate-700 p-2 rounded-xl transition-colors duration-200"
                           title="Download"
                         >
                           <Download className="w-4 h-4" />
@@ -270,7 +271,7 @@ export default function PhotosPage() {
                         </button>
                         <button
                           onClick={() => setSelected(photo)}
-                          className="bg-warmRed-100 hover:bg-warmRed-200 text-warmRed-700 p-2 rounded-xl transition-colors duration-200"
+                          className="bg-red-100 hover:bg-red-200 text-red-700 p-2 rounded-xl transition-colors duration-200"
                           title="View Full Size"
                         >
                           <Eye className="w-4 h-4" />
@@ -287,7 +288,7 @@ export default function PhotosPage() {
               <button
                 onClick={() => load(true)}
                 disabled={loading || !hasMore}
-                className="bg-warmRed-700 hover:bg-warmRed-800 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2"
+                className="bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2"
               >
                 {loading ? (
                   <>
@@ -313,7 +314,7 @@ export default function PhotosPage() {
                   setHasMore(true);
                   load(false);
                 }}
-                className="bg-charcoal-700 hover:bg-charcoal-800 text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2"
+                className="bg-slate-700 hover:bg-slate-800 text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2"
               >
                 <RefreshCw className="w-5 h-5" />
                 <span>Refresh</span>
@@ -332,23 +333,23 @@ export default function PhotosPage() {
           aria-modal="true"
         >
           <div
-            className="bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl border border-peach-200/50 max-w-4xl w-full max-h-[90vh] overflow-hidden"
+            className="bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl border border-amber-200/50 max-w-4xl w-full max-h-[90vh] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6">
               {/* Modal Header */}
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-xl font-bold text-charcoal-800">
+                  <h3 className="text-xl font-bold text-slate-800">
                     Photo Details
                   </h3>
-                  <p className="text-charcoal-600">
+                  <p className="text-slate-600">
                     {formatDate(selected.createdAt)}
                   </p>
                 </div>
                 <button
                   onClick={() => setSelected(null)}
-                  className="bg-gray-100 hover:bg-gray-200 text-charcoal-700 p-2 rounded-xl transition-colors duration-200"
+                  className="bg-amber-100 hover:bg-amber-200 text-slate-700 p-2 rounded-xl transition-colors duration-200"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -372,7 +373,7 @@ export default function PhotosPage() {
                   onClick={() =>
                     downloadPhoto(selected.url, `photo-${selected._id}.jpg`)
                   }
-                  className="bg-charcoal-700 hover:bg-charcoal-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2"
+                  className="bg-slate-700 hover:bg-slate-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2"
                 >
                   <Download className="w-5 h-5" />
                   <span>Download</span>
@@ -388,7 +389,7 @@ export default function PhotosPage() {
 
                 <button
                   onClick={() => window.open(selected.url, "_blank")}
-                  className="bg-warmRed-600 hover:bg-warmRed-700 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2"
+                  className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2"
                 >
                   <ExternalLink className="w-5 h-5" />
                   <span>Open Original</span>
@@ -398,6 +399,7 @@ export default function PhotosPage() {
           </div>
         </div>
       )}
+      <Footer />
     </div>
   );
 }

@@ -1,15 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Camera,
-  Palette,
-  Smartphone,
-  Gem,
-  Check,
-  Star,
-  Sparkles,
-} from "lucide-react";
+import { motion } from "motion/react";
+import { Camera, Palette, Smartphone, Gem, Check, Star } from "lucide-react";
+import Footer from "@/components/Footer";
 
 export default function Home() {
   const features = [
@@ -18,28 +12,23 @@ export default function Home() {
       title: "Professional Photo Booth",
       description:
         "High-quality camera with professional lighting and filters for perfect shots.",
-      iconColor: "coral",
     },
     {
       icon: Palette,
       title: "Advanced Editing Tools",
       description:
-        "Professional-grade filters, effects, and editing tools to enhance your photos.",
-      iconColor: "sage",
+        "Premium filters, effects, and editing tools to enhance your photos effortlessly.",
     },
     {
       icon: Smartphone,
       title: "Instant WhatsApp Share",
-      description:
-        "Share your photos instantly to WhatsApp or download them directly.",
-      iconColor: "coral",
+      description: "Share photos instantly to WhatsApp or download directly.",
     },
     {
       icon: Gem,
       title: "Token-based System",
       description:
         "Purchase tokens to unlock premium features and unlimited downloads.",
-      iconColor: "charcoal",
     },
   ];
 
@@ -86,175 +75,209 @@ export default function Home() {
   ];
 
   return (
-    <div style={{ minHeight: "100vh" }}>
-      {/* Hero Section */}
-      <section
-        style={{
-          padding: "5rem 0",
-          backgroundColor: "var(--color-cream-100, #f5f0e8)",
-          textAlign: "center",
-        }}
-      >
-        <div
-          style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1rem" }}
-        >
-          <h1
-            style={{
-              fontSize: "3rem",
-              fontWeight: "bold",
-              color: "var(--color-charcoal-900, #2a312d)",
-              marginBottom: "1.5rem",
-            }}
-          >
-            ClickBooth Studio
-          </h1>
-          <p
-            style={{
-              fontSize: "1.25rem",
-              color: "var(--color-charcoal-700, #4a524e)",
-              maxWidth: "48rem",
-              margin: "0 auto 2rem",
-            }}
-          >
-            Professional photo booth experience with AI-powered filters, instant
-            sharing, and premium quality results.
-          </p>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "1rem",
-              alignItems: "center",
-            }}
-          >
-            <Link
-              href="/booth"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                backgroundColor: "var(--color-coral-600, #e8855a)",
-                color: "white",
-                padding: "1rem 2rem",
-                borderRadius: "2rem",
-                textDecoration: "none",
-                fontWeight: "600",
-                fontSize: "1.1rem",
-              }}
-            >
-              <Camera className="w-6 h-6" />
-              <span>Start Photo Session</span>
+    <div className="min-h-screen bg-amber-50 text-slate-900">
+      {/* Top Nav (Minimal, elegan) */}
+      <header className="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-amber-50/70 bg-amber-50/80 border-b border-amber-200">
+        <div className="container mx-auto max-w-7xl px-4 h-14 flex items-center justify-between">
+          <Link href="/" className="font-semibold tracking-tight text-lg">
+            ClickBooth <span className="text-red-600">Studio</span>
+          </Link>
+          <nav className="hidden sm:flex items-center gap-6 text-sm font-medium text-slate-700">
+            <Link href="#features" className="hover:text-slate-900 transition">
+              Features
             </Link>
-          </div>
+            <Link href="#pricing" className="hover:text-slate-900 transition">
+              Pricing
+            </Link>
+            <Link
+              href="/login"
+              className="px-3 py-1.5 rounded-lg border border-amber-300 hover:bg-amber-100 transition"
+            >
+              Sign In
+            </Link>
+          </nav>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section className="relative overflow-hidden">
+        {/* Subtle gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-amber-50 via-amber-100 to-amber-200" />
+        <div className="container mx-auto max-w-7xl px-4 relative">
+          <motion.div
+            initial={{ opacity: 0, y: 32 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="py-20 md:py-28 text-center"
+          >
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-balance">
+              Professional Photo Booth with{" "}
+              <span className="text-red-600">AI</span> Precision
+            </h1>
+            <p className="mt-4 md:mt-6 text-base md:text-lg text-slate-600 max-w-2xl mx-auto">
+              Experience premium photo results, AI-powered filters, and instant
+              sharing—crafted for modern events and brands.
+            </p>
+
+            <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+              <Link
+                href="/booth"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-red-500 text-white font-semibold shadow-sm hover:bg-red-600 transition"
+              >
+                <Camera className="w-5 h-5" />
+                Start Photo Session
+              </Link>
+              <Link
+                href="#features"
+                className="inline-flex items-center justify-center px-5 py-3 rounded-lg border border-amber-300 text-slate-800 hover:bg-amber-100 transition"
+              >
+                Explore Features
+              </Link>
+            </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="section section-alt">
-        <div className="container">
+      {/* Features */}
+      <section id="features" className="py-16 md:py-20">
+        <div className="container mx-auto max-w-7xl px-4">
           <div className="text-center mb-12">
-            <h2 className="text-heading-2 mb-4">Why Choose ClickBooth?</h2>
-            <p className="text-body-large max-w-2xl mx-auto">
-              Experience the future of photo booth technology with our premium
-              features and professional quality.
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+              Why Choose ClickBooth?
+            </h2>
+            <p className="mt-3 text-slate-600">
+              Future-ready photo booth technology with professional-grade
+              features.
             </p>
           </div>
 
-          <div className="grid-features">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
             {features.map((feature, index) => (
-              <div key={index} className="card card-feature">
-                <div className={`icon-container ${feature.iconColor}`}>
-                  <feature.icon className="w-8 h-8 text-white" />
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ delay: index * 0.06, duration: 0.4 }}
+                className="group relative rounded-xl border border-amber-200 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition overflow-hidden"
+              >
+                <div className="p-6">
+                  <div className="inline-flex items-center justify-center w-11 h-11 rounded-lg bg-red-50 text-red-600 ring-1 ring-red-100 mb-4">
+                    <feature.icon className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-lg font-semibold">{feature.title}</h3>
+                  <p className="mt-2 text-sm text-slate-600">
+                    {feature.description}
+                  </p>
                 </div>
-                <h3 className="text-heading-4 mb-3">{feature.title}</h3>
-                <p className="text-body">{feature.description}</p>
-              </div>
+                <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-transparent via-red-600/30 to-transparent opacity-0 group-hover:opacity-100 transition" />
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section className="section">
-        <div className="container">
+      {/* Pricing */}
+      <section id="pricing" className="py-16 md:py-20 bg-amber-100">
+        <div className="container mx-auto max-w-7xl px-4">
           <div className="text-center mb-12">
-            <h2 className="text-heading-2 mb-4">Choose Your Plan</h2>
-            <p className="text-body-large max-w-2xl mx-auto">
-              Select the perfect token package for your photo booth needs. All
-              plans include premium features.
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+              Choose Your Plan
+            </h2>
+            <p className="mt-3 text-slate-600">
+              Select the perfect token package for your photo booth needs.
             </p>
           </div>
 
-          <div className="grid-pricing">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
             {plans.map((plan, index) => (
-              <div
+              <motion.div
                 key={index}
-                className={`card card-pricing ${plan.popular ? "popular" : ""}`}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ delay: index * 0.06, duration: 0.4 }}
+                className={`relative rounded-2xl border bg-white shadow-sm transition ${
+                  plan.popular
+                    ? "border-red-500 ring-2 ring-red-200"
+                    : "border-amber-200"
+                }`}
               >
                 {plan.popular && (
-                  <div className="badge-popular">
-                    <Star className="w-4 h-4 fill-current" />
-                    <span>Most Popular</span>
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm font-semibold text-red-700 shadow ring-1 ring-red-200">
+                    <Star className="w-4 h-4 fill-red-600 text-red-600" />
+                    Most Popular
                   </div>
                 )}
 
-                <div className="text-center mb-6">
-                  <h3 className="text-heading-3 mb-2">{plan.name}</h3>
-                  <div className="text-heading-1 mb-2 text-primary">
+                <div className="p-7">
+                  <h3 className="text-xl font-bold">{plan.name}</h3>
+                  <p className="mt-2 text-4xl font-bold tracking-tight text-red-600">
                     Rp {plan.price}
-                  </div>
-                  <div className="text-body text-charcoal-600">
-                    {plan.tokens} Tokens
-                  </div>
+                  </p>
+                  <p className="mt-1 text-slate-600">{plan.tokens} Tokens</p>
+
+                  <ul className="mt-6 space-y-2">
+                    {plan.features.map((f, i) => (
+                      <li
+                        key={i}
+                        className="flex items-center gap-2 text-slate-800"
+                      >
+                        <Check className="w-4 h-4 text-red-600" />
+                        <span className="text-sm">{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Link
+                    href="/payment"
+                    className={`mt-7 block w-full text-center px-4 py-2.5 rounded-lg font-semibold transition ${
+                      plan.popular
+                        ? "bg-red-500 text-white hover:bg-red-600 shadow-sm"
+                        : "bg-amber-200 text-slate-900 hover:bg-amber-300"
+                    }`}
+                  >
+                    Get Started
+                  </Link>
                 </div>
-
-                <ul className="space-y-3 mb-6">
-                  {plan.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-center gap-3">
-                      <Check className="w-5 h-5 flex-shrink-0 text-primary" />
-                      <span className="text-body">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <Link
-                  href="/payment"
-                  className={`btn w-full justify-center ${
-                    plan.popular ? "btn-primary" : "btn-secondary"
-                  }`}
-                >
-                  Get Started
-                </Link>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="section section-alt">
-        <div className="container">
-          <div className="cta-card">
-            <h2 className="text-heading-2 mb-4 text-white">
-              Ready to Create Amazing Photos?
-            </h2>
-            <p className="text-body-large mb-6 text-white/90">
-              Join thousands of users who trust ClickBooth for their
-              professional photo needs.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/booth" className="btn btn-secondary">
-                <Camera className="w-5 h-5" />
-                <span>Try Now - Free</span>
-              </Link>
-              <Link href="/login" className="btn btn-outline-white">
-                <Sparkles className="w-5 h-5" />
-                <span>Sign Up</span>
-              </Link>
+      {/* CTA */}
+      <section className="py-16 md:py-20">
+        <div className="container mx-auto max-w-7xl px-4">
+          <div className="rounded-2xl overflow-hidden border border-amber-200 bg-gradient-to-r from-red-500 to-red-600 text-white">
+            <div className="px-6 md:px-10 py-12 text-center">
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+                Ready to Create Amazing Photos?
+              </h2>
+              <p className="mt-3 text-white/90">
+                Join thousands of users who trust ClickBooth for their
+                professional photo needs.
+              </p>
+              <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+                <Link
+                  href="/booth"
+                  className="px-6 py-3 bg-white text-red-600 rounded-lg font-semibold shadow hover:bg-amber-50 transition"
+                >
+                  Try Now - Free
+                </Link>
+                <Link
+                  href="/login"
+                  className="px-6 py-3 border border-white/70 text-white rounded-lg font-semibold hover:bg-white hover:text-red-600 transition"
+                >
+                  Sign Up
+                </Link>
+              </div>
             </div>
           </div>
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 }

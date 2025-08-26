@@ -66,32 +66,35 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
+    <div className="min-h-screen bg-amber-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-amber-200 p-8">
         {/* Header */}
-        <div className="auth-header">
+        <div className="text-center mb-8">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 mb-4 text-body transition-colors"
-            style={{ color: "var(--color-foreground-secondary)" }}
+            className="inline-flex items-center gap-2 mb-6 text-slate-600 hover:text-red-600 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back to Home</span>
           </Link>
 
-          <div className="icon-container coral auth-icon">
+          <div className="w-16 h-16 bg-red-500 rounded-2xl mx-auto mb-4 flex items-center justify-center">
             <LogIn className="w-8 h-8 text-white" />
           </div>
 
-          <h1 className="text-heading-2 mb-2">Welcome Back</h1>
-          <p className="text-body">Sign in to your ClickBooth account</p>
+          <h1 className="text-3xl font-bold text-slate-800 mb-2">
+            Welcome Back
+          </h1>
+          <p className="text-slate-600">Sign in to your ClickBooth account</p>
         </div>
 
         {/* Message Alert */}
         {message && (
           <div
-            className={`alert ${
-              messageType === "success" ? "alert-success" : "alert-error"
+            className={`p-4 rounded-lg border mb-6 ${
+              messageType === "success"
+                ? "bg-green-50 border-green-200 text-green-800"
+                : "bg-red-50 border-red-200 text-red-800"
             }`}
           >
             <div className="flex items-center gap-2">
@@ -106,22 +109,22 @@ export default function LoginPage() {
         )}
 
         {/* Login Form */}
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div className="form-group">
-            <label htmlFor="email" className="form-label">
+        <form onSubmit={handleLogin} className="space-y-6">
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-slate-700 mb-2"
+            >
               Email Address
             </label>
             <div className="relative">
-              <Mail
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
-                style={{ color: "var(--color-foreground-muted)" }}
-              />
+              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
               <input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="form-input pl-12"
+                className="w-full pl-12 pr-4 py-3 border border-amber-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors bg-white"
                 placeholder="Enter your email"
                 required
                 disabled={loading}
@@ -129,21 +132,21 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="password" className="form-label">
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-slate-700 mb-2"
+            >
               Password
             </label>
             <div className="relative">
-              <Lock
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
-                style={{ color: "var(--color-foreground-muted)" }}
-              />
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
               <input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="form-input pl-12"
+                className="w-full pl-12 pr-4 py-3 border border-amber-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors bg-white"
                 placeholder="Enter your password"
                 required
                 disabled={loading}
@@ -154,8 +157,10 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className={`btn btn-primary w-full justify-center ${
-              loading ? "btn-loading" : ""
+            className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-colors shadow-lg ${
+              loading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-red-500 hover:bg-red-600 text-white"
             }`}
           >
             {!loading && <LogIn className="w-5 h-5" />}
@@ -164,13 +169,12 @@ export default function LoginPage() {
         </form>
 
         {/* Footer */}
-        <div className="auth-footer">
-          <p className="text-body-small">
+        <div className="text-center mt-8 pt-6 border-t border-amber-200">
+          <p className="text-sm text-slate-600">
             Don&apos;t have an account?{" "}
             <Link
               href="/register"
-              className="font-semibold transition-colors"
-              style={{ color: "var(--color-primary)" }}
+              className="font-semibold text-red-600 hover:text-red-700 transition-colors"
             >
               Sign up here
             </Link>

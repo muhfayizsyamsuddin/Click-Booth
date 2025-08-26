@@ -244,12 +244,14 @@ export default function BoothPage() {
   }
 
   return (
-    <div className="min-h-screen bg-cream-100">
+    <div className="min-h-screen bg-amber-50">
       {/* Header */}
-      <div className="bg-white border-b border-charcoal-200 shadow-sm">
+      <div className="bg-white border-b border-amber-200 shadow-sm">
         <div className="container py-4">
-          <h1 className="text-heading-2 text-center">📸 ClickBooth Studio</h1>
-          <p className="text-center text-body mt-1">
+          <h1 className="text-heading-2 text-center text-slate-800">
+            📸 ClickBooth Studio
+          </h1>
+          <p className="text-center text-body mt-1 text-slate-600">
             Professional Photo Booth Experience
           </p>
         </div>
@@ -260,7 +262,7 @@ export default function BoothPage() {
         {/* Camera/Photo Container */}
         <div className="card mb-8 overflow-hidden">
           {/* Status Bar */}
-          <div className="bg-coral-600 px-6 py-3">
+          <div className="bg-red-500 px-6 py-3">
             <div className="flex items-center justify-between text-white">
               <div className="flex items-center space-x-2">
                 <div
@@ -279,7 +281,7 @@ export default function BoothPage() {
           </div>
 
           {/* Video/Canvas Area */}
-          <div className="relative bg-charcoal-900 aspect-video">
+          <div className="relative bg-slate-900 aspect-video">
             <video
               ref={videoRef}
               autoPlay
@@ -300,7 +302,7 @@ export default function BoothPage() {
             {/* Countdown Overlay */}
             {!photoTaken && runningCountdown && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                <div className="bg-coral-600 w-32 h-32 rounded-full flex items-center justify-center shadow-2xl animate-pulse">
+                <div className="bg-red-500 w-32 h-32 rounded-full flex items-center justify-center shadow-2xl animate-pulse">
                   <span className="text-white text-6xl font-bold drop-shadow-lg">
                     {countdown}
                   </span>
@@ -312,13 +314,16 @@ export default function BoothPage() {
             {!photoTaken && !runningCountdown && (
               <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2">
                 <div className="flex items-center space-x-4">
-                  <button onClick={startCamera} className="btn btn-secondary">
+                  <button
+                    onClick={startCamera}
+                    className="bg-amber-100 text-slate-800 px-6 py-3 rounded-lg font-medium hover:bg-amber-200 transition-colors shadow-lg border border-amber-200"
+                  >
                     🎥 Start Camera
                   </button>
                   <button
                     onClick={startCountdown}
                     disabled={runningCountdown}
-                    className="btn btn-primary"
+                    className="bg-red-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg"
                   >
                     📸 Capture Photo
                   </button>
@@ -333,7 +338,7 @@ export default function BoothPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <button
               onClick={downloadPhoto}
-              className="btn btn-secondary flex items-center justify-center space-x-2 group"
+              className="bg-amber-100 text-slate-800 px-6 py-3 rounded-lg font-medium hover:bg-amber-200 transition-colors shadow-lg border border-amber-200 flex items-center justify-center space-x-2 group"
             >
               <span className="text-xl group-hover:scale-110 transition-transform">
                 💾
@@ -344,9 +349,11 @@ export default function BoothPage() {
             <button
               onClick={() => uploadPhoto(false)}
               disabled={uploading}
-              className={`btn ${
-                uploading ? "btn-loading" : "btn-primary"
-              } flex items-center justify-center space-x-2 group`}
+              className={`${
+                uploading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-red-500 hover:bg-red-600"
+              } text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-lg flex items-center justify-center space-x-2 group`}
               title={
                 !loggedIn
                   ? "Login required for upload"
@@ -362,9 +369,11 @@ export default function BoothPage() {
             <button
               onClick={handleSendWhatsApp}
               disabled={uploading}
-              className={`btn ${
-                uploading ? "btn-loading" : "btn-primary"
-              } flex items-center justify-center space-x-2 group`}
+              className={`${
+                uploading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-red-500 hover:bg-red-600"
+              } text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-lg flex items-center justify-center space-x-2 group`}
               title="Send to WhatsApp number in profile"
             >
               <span className="text-xl group-hover:scale-110 transition-transform">
@@ -375,7 +384,7 @@ export default function BoothPage() {
 
             <button
               onClick={retakePhoto}
-              className="btn btn-secondary flex items-center justify-center space-x-2 group"
+              className="bg-amber-100 text-slate-800 px-6 py-3 rounded-lg font-medium hover:bg-amber-200 transition-colors shadow-lg border border-amber-200 flex items-center justify-center space-x-2 group"
             >
               <span className="text-xl group-hover:scale-110 transition-transform">
                 🔄
@@ -387,23 +396,25 @@ export default function BoothPage() {
 
         {/* Message Display */}
         {message && (
-          <div className="alert alert-info mb-8">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
             <div className="flex items-center space-x-3">
               <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-              <p className="text-body font-medium">{message}</p>
+              <p className="text-body font-medium text-blue-800">{message}</p>
             </div>
           </div>
         )}
 
         {/* QR Code Section */}
         {uploadedPhotoUrl && (
-          <div className="card text-center mb-8">
-            <h3 className="text-heading-3 mb-4">📱 Quick Access</h3>
-            <p className="text-body mb-6">
+          <div className="bg-white rounded-xl shadow-lg border border-amber-200 p-8 text-center mb-8">
+            <h3 className="text-heading-3 mb-4 text-slate-800">
+              📱 Quick Access
+            </h3>
+            <p className="text-body mb-6 text-slate-600">
               Scan QR code to view your photo on any device
             </p>
 
-            <div className="inline-block bg-white p-6 rounded-2xl shadow-lg border border-charcoal-200 mb-6">
+            <div className="inline-block bg-white p-6 rounded-2xl shadow-lg border border-amber-200 mb-6">
               <QRCodeCanvas value={uploadedPhotoUrl} size={200} level="M" />
             </div>
 
@@ -412,7 +423,7 @@ export default function BoothPage() {
                 href={uploadedPhotoUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="btn btn-primary"
+                className="bg-red-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-red-600 transition-colors shadow-lg inline-flex items-center space-x-2"
               >
                 <span>🔗</span>
                 <span>Open Photo</span>
@@ -423,34 +434,42 @@ export default function BoothPage() {
 
         {/* Getting Started Guide */}
         {!photoTaken && !runningCountdown && (
-          <div className="card">
-            <h3 className="text-heading-3 mb-6 text-center">🎯 How to Use</h3>
+          <div className="bg-white rounded-xl shadow-lg border border-amber-200 p-8">
+            <h3 className="text-heading-3 mb-6 text-center text-slate-800">
+              🎯 How to Use
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="text-center">
-                <div className="bg-coral-600 text-white w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 font-bold text-lg">
+                <div className="bg-red-500 text-white w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 font-bold text-lg">
                   1
                 </div>
-                <h4 className="text-heading-5 mb-2">Start Camera</h4>
-                <p className="text-body-small">
+                <h4 className="text-heading-5 mb-2 text-slate-800">
+                  Start Camera
+                </h4>
+                <p className="text-body-small text-slate-600">
                   Click &ldquo;Start Camera&rdquo; to begin your photo session
                 </p>
               </div>
               <div className="text-center">
-                <div className="bg-sage-600 text-white w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 font-bold text-lg">
+                <div className="bg-amber-500 text-white w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 font-bold text-lg">
                   2
                 </div>
-                <h4 className="text-heading-5 mb-2">Capture Photo</h4>
-                <p className="text-body-small">
+                <h4 className="text-heading-5 mb-2 text-slate-800">
+                  Capture Photo
+                </h4>
+                <p className="text-body-small text-slate-600">
                   Click &ldquo;Capture Photo&rdquo; and get ready for the
                   countdown
                 </p>
               </div>
               <div className="text-center">
-                <div className="bg-charcoal-600 text-white w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 font-bold text-lg">
+                <div className="bg-slate-600 text-white w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 font-bold text-lg">
                   3
                 </div>
-                <h4 className="text-heading-5 mb-2">Save & Share</h4>
-                <p className="text-body-small">
+                <h4 className="text-heading-5 mb-2 text-slate-800">
+                  Save & Share
+                </h4>
+                <p className="text-body-small text-slate-600">
                   Download, upload to cloud, or send via WhatsApp
                 </p>
               </div>

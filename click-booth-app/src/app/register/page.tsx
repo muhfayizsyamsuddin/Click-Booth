@@ -103,25 +103,30 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="auth-container">
+    <div className="min-h-screen bg-amber-50 py-8 flex items-center justify-center">
       <div className="max-w-lg w-full mx-4">
         {/* Header */}
-        <div className="auth-header">
-          <div className="icon-container coral auth-icon">
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 bg-red-500 rounded-2xl mx-auto mb-4 flex items-center justify-center">
             <UserPlus className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-heading-2 mb-2">Join ClickBooth</h1>
-          <p className="text-body">
+          <h1 className="text-3xl font-bold text-slate-800 mb-2">
+            Join ClickBooth
+          </h1>
+          <p className="text-slate-600">
             Create your professional photo studio account
           </p>
         </div>
 
         {/* Registration Form */}
-        <div className="auth-card">
+        <div className="bg-white rounded-2xl shadow-xl border border-amber-200 p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Full Name */}
-            <div className="form-group">
-              <label htmlFor="fullName" className="form-label">
+            <div>
+              <label
+                htmlFor="fullName"
+                className="block text-sm font-medium text-slate-700 mb-2"
+              >
                 Full Name
               </label>
               <input
@@ -131,14 +136,17 @@ export default function RegisterPage() {
                 placeholder="Enter your full name"
                 value={formData.fullName}
                 onChange={handleInputChange}
-                className="form-input"
+                className="w-full px-4 py-3 border border-amber-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors bg-white"
                 required
               />
             </div>
 
             {/* Username */}
-            <div className="form-group">
-              <label htmlFor="username" className="form-label">
+            <div>
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium text-slate-700 mb-2"
+              >
                 Username
               </label>
               <input
@@ -148,15 +156,18 @@ export default function RegisterPage() {
                 placeholder="Choose a unique username"
                 value={formData.username}
                 onChange={handleInputChange}
-                className="form-input"
+                className="w-full px-4 py-3 border border-amber-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors bg-white"
                 required
               />
             </div>
 
             {/* Email & Phone Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="form-group">
-                <label htmlFor="email" className="form-label">
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-slate-700 mb-2"
+                >
                   Email
                 </label>
                 <input
@@ -166,12 +177,15 @@ export default function RegisterPage() {
                   placeholder="your@email.com"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="form-input"
+                  className="w-full px-4 py-3 border border-amber-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors bg-white"
                   required
                 />
               </div>
-              <div className="form-group">
-                <label htmlFor="phoneNumber" className="form-label">
+              <div>
+                <label
+                  htmlFor="phoneNumber"
+                  className="block text-sm font-medium text-slate-700 mb-2"
+                >
                   Phone
                 </label>
                 <input
@@ -181,7 +195,7 @@ export default function RegisterPage() {
                   placeholder="+62 xxx xxxx xxxx"
                   value={formData.phoneNumber}
                   onChange={handleInputChange}
-                  className="form-input"
+                  className="w-full px-4 py-3 border border-amber-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors bg-white"
                   required
                 />
               </div>
@@ -189,8 +203,11 @@ export default function RegisterPage() {
 
             {/* Password Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="form-group">
-                <label htmlFor="password" className="form-label">
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-slate-700 mb-2"
+                >
                   Password
                 </label>
                 <div className="relative">
@@ -201,13 +218,13 @@ export default function RegisterPage() {
                     placeholder="Create password"
                     value={formData.password}
                     onChange={handleInputChange}
-                    className="form-input pr-12"
+                    className="w-full px-4 py-3 pr-12 border border-amber-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors bg-white"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-charcoal-500 hover:text-charcoal-700 transition-colors duration-200"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                   >
                     {showPassword ? (
                       <EyeOff className="w-5 h-5" />
@@ -217,8 +234,11 @@ export default function RegisterPage() {
                   </button>
                 </div>
               </div>
-              <div className="form-group">
-                <label htmlFor="confirmPassword" className="form-label">
+              <div>
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium text-slate-700 mb-2"
+                >
                   Confirm Password
                 </label>
                 <div className="relative">
@@ -229,13 +249,13 @@ export default function RegisterPage() {
                     placeholder="Confirm password"
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
-                    className="form-input pr-12"
+                    className="w-full px-4 py-3 pr-12 border border-amber-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors bg-white"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-charcoal-500 hover:text-charcoal-700 transition-colors duration-200"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                   >
                     {showConfirmPassword ? (
                       <EyeOff className="w-5 h-5" />
@@ -248,12 +268,12 @@ export default function RegisterPage() {
             </div>
 
             {/* Terms & Conditions */}
-            <div className="alert alert-info">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <div className="flex items-start space-x-3">
-                <div className="w-5 h-5 rounded-full bg-coral-600 flex items-center justify-center mt-0.5">
+                <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center mt-0.5">
                   <Check className="w-3 h-3 text-white" />
                 </div>
-                <div className="text-sm">
+                <div className="text-sm text-blue-800">
                   <p>
                     By creating an account, you agree to our Terms of Service
                     and Privacy Policy. Your data is secure and protected.
@@ -266,8 +286,10 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className={`btn btn-primary btn-large w-full ${
-                loading ? "btn-loading" : ""
+              className={`w-full flex items-center justify-center gap-2 py-4 px-4 rounded-lg font-medium transition-colors shadow-lg ${
+                loading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-red-500 hover:bg-red-600 text-white"
               }`}
             >
               {!loading && (
@@ -276,16 +298,17 @@ export default function RegisterPage() {
                   <span>Create Account</span>
                 </>
               )}
+              {loading && <span>Creating Account...</span>}
             </button>
           </form>
 
           {/* Message Display */}
           {message && (
             <div
-              className={`${
+              className={`mt-6 p-4 rounded-lg border ${
                 message.includes("successful") || message.includes("berhasil")
-                  ? "alert alert-success"
-                  : "alert alert-error"
+                  ? "bg-green-50 border-green-200 text-green-800"
+                  : "bg-red-50 border-red-200 text-red-800"
               }`}
             >
               {message}
@@ -293,11 +316,11 @@ export default function RegisterPage() {
           )}
 
           {/* Navigation Links */}
-          <div className="auth-footer">
+          <div className="mt-8 pt-6 border-t border-amber-200">
             <div className="text-center mb-4">
               <Link
                 href="/login"
-                className="text-coral-600 hover:text-coral-700 font-medium transition-colors duration-200"
+                className="text-red-600 hover:text-red-700 font-medium transition-colors"
               >
                 Already have an account? Sign in
               </Link>
@@ -306,7 +329,7 @@ export default function RegisterPage() {
             <div className="text-center">
               <Link
                 href="/"
-                className="inline-flex items-center space-x-2 text-charcoal-600 hover:text-charcoal-700 transition-colors duration-200"
+                className="inline-flex items-center space-x-2 text-slate-600 hover:text-red-600 transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span>Back to Home</span>
@@ -316,42 +339,50 @@ export default function RegisterPage() {
         </div>
 
         {/* Benefits Card */}
-        <div className="card mt-6">
-          <h3 className="text-heading-4 mb-4 text-center flex items-center justify-center space-x-2">
-            <Gift className="w-5 h-5 text-coral-600" />
+        <div className="bg-white rounded-2xl shadow-lg border border-amber-200 p-6 mt-6">
+          <h3 className="text-xl font-semibold text-slate-800 mb-4 text-center flex items-center justify-center space-x-2">
+            <Gift className="w-5 h-5 text-red-500" />
             <span>Welcome Benefits</span>
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
-                <span className="w-2 h-2 bg-coral-600 rounded-full"></span>
-                <span className="text-body-small">5 Free starter tokens</span>
+                <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                <span className="text-sm text-slate-600">
+                  5 Free starter tokens
+                </span>
               </div>
               <div className="flex items-center space-x-2">
-                <span className="w-2 h-2 bg-coral-600 rounded-full"></span>
-                <span className="text-body-small">
+                <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                <span className="text-sm text-slate-600">
                   Professional photo filters
                 </span>
               </div>
               <div className="flex items-center space-x-2">
-                <span className="w-2 h-2 bg-coral-600 rounded-full"></span>
-                <span className="text-body-small">
+                <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                <span className="text-sm text-slate-600">
                   WhatsApp instant sharing
                 </span>
               </div>
             </div>
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
-                <span className="w-2 h-2 bg-sage-600 rounded-full"></span>
-                <span className="text-body-small">Cloud photo storage</span>
+                <span className="w-2 h-2 bg-amber-500 rounded-full"></span>
+                <span className="text-sm text-slate-600">
+                  Cloud photo storage
+                </span>
               </div>
               <div className="flex items-center space-x-2">
-                <span className="w-2 h-2 bg-sage-600 rounded-full"></span>
-                <span className="text-body-small">HD quality downloads</span>
+                <span className="w-2 h-2 bg-amber-500 rounded-full"></span>
+                <span className="text-sm text-slate-600">
+                  HD quality downloads
+                </span>
               </div>
               <div className="flex items-center space-x-2">
-                <span className="w-2 h-2 bg-sage-600 rounded-full"></span>
-                <span className="text-body-small">24/7 customer support</span>
+                <span className="w-2 h-2 bg-amber-500 rounded-full"></span>
+                <span className="text-sm text-slate-600">
+                  24/7 customer support
+                </span>
               </div>
             </div>
           </div>
@@ -359,9 +390,9 @@ export default function RegisterPage() {
 
         {/* Security Note */}
         <div className="mt-6 text-center">
-          <div className="inline-flex items-center space-x-2 bg-white/90 backdrop-blur-sm rounded-2xl px-4 py-2 border border-cream-300">
+          <div className="inline-flex items-center space-x-2 bg-white/90 backdrop-blur-sm rounded-2xl px-4 py-2 border border-amber-200">
             <Shield className="w-4 h-4 text-green-500" />
-            <span className="text-body-small">
+            <span className="text-sm text-slate-600">
               Your data is encrypted and secure
             </span>
           </div>
