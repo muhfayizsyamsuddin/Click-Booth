@@ -463,29 +463,35 @@ export default function BoothPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cream-50 to-cream-100">
-      {/* Modern Header Controls */}
-      <div className="bg-white shadow-lg border-b-4 border-coral-500">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
-            {/* Left Section - Layout & Filter */}
-            <div className="flex flex-col lg:flex-row items-center gap-4 w-full lg:w-auto">
-              {/* Layout Selection */}
-              <div className="flex flex-col items-center gap-2">
-                <label className="text-sm font-bold text-charcoal-800 tracking-wide">
-                  LAYOUT
-                </label>
-                <select
-                  value={selectedLayout}
-                  onChange={(e) => setSelectedLayout(e.target.value)}
-                  className="px-4 py-2 border-2 border-coral-300 rounded-full text-sm font-medium bg-white focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-200 transition-all shadow-md hover:shadow-lg min-w-48"
-                >
-                  {LAYOUTS.map((l) => (
-                    <option key={l.id} value={l.id}>
-                      {l.label}
-                    </option>
-                  ))}
-                </select>
+    <div className="min-h-screen bg-amber-50">
+      {/* Header */}
+      <div className="bg-white border-b border-amber-200 shadow-sm">
+        <div className="container py-4">
+          <h1 className="text-heading-2 text-center text-slate-800">
+            📸 ClickBooth Studio
+          </h1>
+          <p className="text-center text-body mt-1 text-slate-600">
+            Professional Photo Booth Experience
+          </p>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="container py-8">
+        {/* Camera/Photo Container */}
+        <div className="card mb-8 overflow-hidden">
+          {/* Status Bar */}
+          <div className="bg-red-500 px-6 py-3">
+            <div className="flex items-center justify-between text-white">
+              <div className="flex items-center space-x-2">
+                <div
+                  className={`w-3 h-3 rounded-full ${
+                    loggedIn ? "bg-green-400" : "bg-red-400"
+                  } animate-pulse`}
+                ></div>
+                <span className="text-caption font-medium">
+                  {loggedIn ? "Connected" : "Guest Mode"}
+                </span>
               </div>
 
               {/* Filter Selection */}
@@ -507,351 +513,198 @@ export default function BoothPage() {
               </div>
             </div>
 
-            {/* Center Section - Preview */}
-            <div className="flex flex-col items-center gap-2">
-              <label className="text-sm font-bold text-charcoal-800 tracking-wide">
-                PREVIEW
-              </label>
-              <LayoutPreview layoutId={selectedLayout} />
-            </div>
+          {/* Video/Canvas Area */}
+          <div className="relative bg-slate-900 aspect-video">
+            <video
+              ref={videoRef}
+              autoPlay
+              muted
+              playsInline
+              className={`w-full h-full object-cover ${
+                photoTaken ? "hidden" : "block"
+              }`}
+            />
+            <canvas
+              ref={canvasRef}
+              aria-hidden={!photoTaken}
+              className={`w-full h-full object-cover ${
+                photoTaken ? "block" : "hidden"
+              }`}
+            />
 
-            {/* Right Section - Status */}
-            <div className="flex flex-col items-center gap-2">
-              <div className="flex items-center gap-3 bg-gradient-to-r from-coral-50 to-coral-100 px-4 py-2 rounded-full border-2 border-coral-200">
-                <div className="flex items-center gap-2">
-                  <div
-                    className={`w-3 h-3 rounded-full ${
-                      loggedIn ? "bg-green-500" : "bg-orange-500"
-                    } animate-pulse shadow-lg`}
-                  ></div>
-                  <span className="text-sm font-bold text-charcoal-800">
-                    {loggedIn ? "Connected" : "Guest"}
+            {/* Countdown Overlay */}
+            {!photoTaken && runningCountdown && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                <div className="bg-red-500 w-32 h-32 rounded-full flex items-center justify-center shadow-2xl animate-pulse">
+                  <span className="text-white text-6xl font-bold drop-shadow-lg">
+                    {countdown}
                   </span>
                 </div>
-                <div className="h-4 w-px bg-coral-300"></div>
-                <div className="text-sm font-bold text-coral-600 bg-white px-3 py-1 rounded-full border border-coral-300">
-                  {shotsCount} shots
+              </div>
+            )}
+
+            {/* Camera Controls Overlay */}
+            {!photoTaken && !runningCountdown && (
+              <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2">
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={startCamera}
+                    className="bg-amber-100 text-slate-800 px-6 py-3 rounded-lg font-medium hover:bg-amber-200 transition-colors shadow-lg border border-amber-200"
+                  >
+                    🎥 Start Camera
+                  </button>
+                  <button
+                    onClick={startCountdown}
+                    disabled={runningCountdown}
+                    className="bg-red-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg"
+                  >
+                    📸 Capture Photo
+                  </button>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
-      </div>
 
-      {/* Main Camera Section */}
-      <div className="container mx-auto px-6 py-6">
-        <div className="max-w-4xl mx-auto">
-          {/* Camera Container */}
-          <div className="bg-white rounded-2xl shadow-2xl border-4 border-coral-200 overflow-hidden mb-6">
-            {/* Camera Status Bar */}
-            <div className="bg-gradient-to-r from-coral-500 to-coral-600 px-6 py-3">
-              <div className="flex items-center justify-between text-white">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse shadow-lg"></div>
-                    <span className="font-bold text-sm tracking-wide">
-                      CAMERA READY
-                    </span>
-                  </div>
-                  {capturedDataUrls.length > 0 && (
-                    <div className="bg-white/20 px-3 py-1 rounded-full">
-                      <span className="text-xs font-bold">
-                        {capturedDataUrls.length}/{shotsCount} CAPTURED
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <div className="text-sm font-bold">
-                  {!finalComposed ? "📸 PHOTO BOOTH" : "✨ COMPOSED"}
-                </div>
-              </div>
-            </div>
+        {/* Action Buttons */}
+        {photoTaken && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <button
+              onClick={downloadPhoto}
+              className="bg-amber-100 text-slate-800 px-6 py-3 rounded-lg font-medium hover:bg-amber-200 transition-colors shadow-lg border border-amber-200 flex items-center justify-center space-x-2 group"
+            >
+              <span className="text-xl group-hover:scale-110 transition-transform">
+                💾
+              </span>
+              <span>Download</span>
+            </button>
 
-            {/* Camera Display */}
-            <div className="relative bg-gradient-to-br from-charcoal-800 to-charcoal-900 p-4">
-              <div
-                className="relative bg-black rounded-xl overflow-hidden shadow-inner border-4 border-charcoal-700"
-                style={{ minHeight: "280px", aspectRatio: "16/10" }}
-              >
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  muted
-                  playsInline
-                  style={{
-                    display:
-                      finalComposed || previewCaptured ? "none" : "block",
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    filter:
-                      AVAILABLE_FILTERS.find((f) => f.id === selectedFilter)
-                        ?.css ?? "none",
-                  }}
-                />
-                <canvas
-                  ref={canvasRef}
-                  aria-hidden={!finalComposed && !previewCaptured}
-                  style={{
-                    display:
-                      finalComposed || previewCaptured ? "block" : "none",
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "contain",
-                    backgroundColor: "#000",
-                  }}
-                />
+            <button
+              onClick={() => uploadPhoto(false)}
+              disabled={uploading}
+              className={`${
+                uploading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-red-500 hover:bg-red-600"
+              } text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-lg flex items-center justify-center space-x-2 group`}
+              title={
+                !loggedIn
+                  ? "Login required for upload"
+                  : "Save photo to gallery"
+              }
+            >
+              <span className="text-xl group-hover:scale-110 transition-transform">
+                ☁️
+              </span>
+              <span>{uploading ? "Uploading..." : "Save to Cloud"}</span>
+            </button>
 
-                {/* Countdown Overlay */}
-                {!previewCaptured && !finalComposed && runningCountdown && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                    <div className="bg-gradient-to-br from-coral-500 to-coral-600 w-20 h-20 rounded-full flex items-center justify-center shadow-2xl border-4 border-white animate-pulse">
-                      <span className="text-white text-2xl font-black">
-                        {countdown}
-                      </span>
-                    </div>
-                  </div>
-                )}
+            <button
+              onClick={handleSendWhatsApp}
+              disabled={uploading}
+              className={`${
+                uploading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-red-500 hover:bg-red-600"
+              } text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-lg flex items-center justify-center space-x-2 group`}
+              title="Send to WhatsApp number in profile"
+            >
+              <span className="text-xl group-hover:scale-110 transition-transform">
+                📱
+              </span>
+              <span>{uploading ? "Sending..." : "Send WhatsApp"}</span>
+            </button>
 
-                {/* Camera Controls */}
-                {!previewCaptured && !finalComposed && !runningCountdown && (
-                  <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2">
-                    <div className="flex items-center gap-4">
-                      <button
-                        onClick={startCamera}
-                        className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-6 py-3 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-xl transform hover:scale-105 border-2 border-gray-500"
-                      >
-                        🎥 Start Camera
-                      </button>
-                      <button
-                        onClick={startCountdown}
-                        disabled={runningCountdown}
-                        className="bg-gradient-to-r from-coral-500 to-coral-600 hover:from-coral-600 hover:to-coral-700 text-white px-8 py-3 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 border-2 border-coral-400"
-                      >
-                        📸 CAPTURE
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
+            <button
+              onClick={retakePhoto}
+              className="bg-amber-100 text-slate-800 px-6 py-3 rounded-lg font-medium hover:bg-amber-200 transition-colors shadow-lg border border-amber-200 flex items-center justify-center space-x-2 group"
+            >
+              <span className="text-xl group-hover:scale-110 transition-transform">
+                🔄
+              </span>
+              <span>Retake</span>
+            </button>
+          </div>
+        )}
+
+        {/* Message Display */}
+        {message && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
+            <div className="flex items-center space-x-3">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+              <p className="text-body font-medium text-blue-800">{message}</p>
             </div>
           </div>
+        )}
 
-          {/* Action Buttons Section */}
-          {(previewCaptured || finalComposed) && (
-            <div className="bg-gradient-to-r from-white to-cream-50 rounded-2xl shadow-xl border-4 border-coral-200 p-6 mb-6">
-              <div className="flex flex-wrap items-center justify-center gap-4">
-                {previewCaptured && (
-                  <>
-                    <button
-                      onClick={() => {
-                        if (!previewCaptured) return;
-                        const c = canvasRef.current!;
-                        const img = new Image();
-                        img.crossOrigin = "anonymous";
-                        img.src = previewCaptured;
-                        img.onload = () => {
-                          c.width = img.naturalWidth;
-                          c.height = img.naturalHeight;
-                          const ctx = c.getContext("2d");
-                          if (!ctx) return;
-                          ctx.drawImage(img, 0, 0);
-                          setFinalComposed(false);
-                        };
-                      }}
-                      className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-xl transform hover:scale-105 border-2 border-blue-400"
-                    >
-                      Preview
-                    </button>
-                    <button
-                      onClick={retakeCurrentShot}
-                      className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 py-3 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-xl transform hover:scale-105 border-2 border-orange-400"
-                    >
-                      Retake
-                    </button>
-                    {capturedDataUrls.length < shotsCount ? (
-                      <button
-                        onClick={() => {
-                          setPreviewCaptured(null);
-                          startCamera();
-                        }}
-                        className="bg-gradient-to-r from-coral-500 to-coral-600 hover:from-coral-600 hover:to-coral-700 text-white px-6 py-3 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-xl transform hover:scale-105 border-2 border-coral-400"
-                      >
-                        Next ({capturedDataUrls.length}/{shotsCount})
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() =>
-                          composeFinal().catch((e) => console.warn(e))
-                        }
-                        className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-3 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-xl transform hover:scale-105 border-2 border-green-400"
-                      >
-                        Compose
-                      </button>
-                    )}
-                  </>
-                )}
-                {finalComposed && (
-                  <>
-                    <button
-                      onClick={() => {
-                        const c = canvasRef.current;
-                        if (!c) return;
-                        const url = c.toDataURL("image/jpeg", 0.92);
-                        const a = document.createElement("a");
-                        a.href = url;
-                        a.download = "photo-composed.jpg";
-                        a.click();
-                      }}
-                      className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-xl transform hover:scale-105 border-2 border-blue-400"
-                    >
-                      💾 Download
-                    </button>
-                    <button
-                      onClick={saveToCloudinary}
-                      disabled={uploading}
-                      className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-6 py-3 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 border-2 border-purple-400"
-                    >
-                      {uploading ? "Saving..." : "☁️ Save to Cloud"}
-                    </button>
-                    <button
-                      onClick={shareToWhatsApp}
-                      disabled={uploading}
-                      className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-3 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 border-2 border-green-400"
-                    >
-                      {uploading ? "Sending..." : "📱 Share WhatsApp"}
-                    </button>
-                    <button
-                      onClick={() => {
-                        try {
-                          const canvas = canvasRef.current;
-                          let finalImage = null;
+        {/* QR Code Section */}
+        {uploadedPhotoUrl && (
+          <div className="bg-white rounded-xl shadow-lg border border-amber-200 p-8 text-center mb-8">
+            <h3 className="text-heading-3 mb-4 text-slate-800">
+              📱 Quick Access
+            </h3>
+            <p className="text-body mb-6 text-slate-600">
+              Scan QR code to view your photo on any device
+            </p>
 
-                          // If photo is already composed, get it from canvas
-                          if (finalComposed && canvas) {
-                            finalImage = canvas.toDataURL();
-                          }
-                          // If not composed yet, use the preview captured image
-                          else if (previewCaptured) {
-                            finalImage = previewCaptured;
-                          }
-                          // Fallback to first captured image
-                          else if (capturedDataUrls.length > 0) {
-                            finalImage = capturedDataUrls[0];
-                          }
-
-                          const payload = {
-                            images: capturedDataUrls.slice(0, shotsCount),
-                            layout: selectedLayout,
-                            filter: selectedFilter,
-                            shots: shotsCount,
-                            finalImage: finalImage,
-                          };
-                          sessionStorage.setItem(
-                            "composePayload",
-                            JSON.stringify(payload)
-                          );
-                          router.push("/compose");
-                        } catch (e) {
-                          console.warn("failed to save compose payload", e);
-                          setMessage("Gagal menyimpan data untuk compose.");
-                        }
-                      }}
-                      className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white px-6 py-3 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-xl transform hover:scale-105 border-2 border-indigo-400"
-                    >
-                      🎨 Edit Compose
-                    </button>
-                    <button
-                      onClick={() => {
-                        setCapturedDataUrls([]);
-                        setPreviewCaptured(null);
-                        setFinalComposed(false);
-                        setUploadedPhotoUrl(null);
-                        setMessage(null);
-                        startCamera();
-                      }}
-                      className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-6 py-3 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-xl transform hover:scale-105 border-2 border-gray-400"
-                    >
-                      🆕 New Session
-                    </button>
-                  </>
-                )}
-              </div>
+            <div className="inline-block bg-white p-6 rounded-2xl shadow-lg border border-amber-200 mb-6">
+              <QRCodeCanvas value={uploadedPhotoUrl} size={200} level="M" />
             </div>
-          )}
 
-          {/* Message Alert */}
-          {message && (
-            <div className="bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-300 rounded-2xl p-4 mb-6 shadow-lg">
-              <div className="flex items-center gap-3">
-                <div className="w-4 h-4 bg-blue-500 rounded-full animate-pulse shadow-lg"></div>
-                <p className="text-sm font-bold text-blue-800">{message}</p>
-              </div>
+            <div>
+              <a
+                href={uploadedPhotoUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="bg-red-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-red-600 transition-colors shadow-lg inline-flex items-center space-x-2"
+              >
+                <span>🔗</span>
+                <span>Open Photo</span>
+              </a>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* QR Code Section */}
-          {uploadedPhotoUrl && (
-            <div className="bg-gradient-to-br from-white to-cream-50 rounded-2xl shadow-xl border-4 border-coral-200 text-center p-6 mb-6">
-              <h3 className="text-lg font-bold mb-4 text-charcoal-800 tracking-wide">
-                📱 QUICK ACCESS
-              </h3>
-              <div className="inline-block bg-white p-4 rounded-xl shadow-lg border-2 border-coral-200 mb-4">
-                <QRCodeCanvas value={uploadedPhotoUrl} size={150} level="M" />
+        {/* Getting Started Guide */}
+        {!photoTaken && !runningCountdown && (
+          <div className="bg-white rounded-xl shadow-lg border border-amber-200 p-8">
+            <h3 className="text-heading-3 mb-6 text-center text-slate-800">
+              🎯 How to Use
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="text-center">
+                <div className="bg-red-500 text-white w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 font-bold text-lg">
+                  1
+                </div>
+                <h4 className="text-heading-5 mb-2 text-slate-800">
+                  Start Camera
+                </h4>
+                <p className="text-body-small text-slate-600">
+                  Click &ldquo;Start Camera&rdquo; to begin your photo session
+                </p>
               </div>
-              <div>
-                <a
-                  href={uploadedPhotoUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="bg-gradient-to-r from-coral-500 to-coral-600 hover:from-coral-600 hover:to-coral-700 text-white px-6 py-3 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-xl transform hover:scale-105 inline-block border-2 border-coral-400"
-                >
-                  🔗 Open Photo
-                </a>
+              <div className="text-center">
+                <div className="bg-amber-500 text-white w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 font-bold text-lg">
+                  2
+                </div>
+                <h4 className="text-heading-5 mb-2 text-slate-800">
+                  Capture Photo
+                </h4>
+                <p className="text-body-small text-slate-600">
+                  Click &ldquo;Capture Photo&rdquo; and get ready for the
+                  countdown
+                </p>
               </div>
-            </div>
-          )}
-
-          {/* Instructions */}
-          {!previewCaptured && !finalComposed && (
-            <div className="bg-gradient-to-br from-white to-cream-50 rounded-2xl shadow-xl border-4 border-coral-200 p-6">
-              <h3 className="text-lg font-bold mb-6 text-center text-charcoal-800 tracking-wide">
-                🎯 QUICK GUIDE
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="text-center">
-                  <div className="bg-gradient-to-br from-coral-500 to-coral-600 text-white w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center font-black text-xl shadow-lg border-4 border-white">
-                    1
-                  </div>
-                  <h4 className="text-lg font-bold mb-2 text-charcoal-800">
-                    Setup
-                  </h4>
-                  <p className="text-sm text-charcoal-600">
-                    Choose layout & filter, then start camera
-                  </p>
+              <div className="text-center">
+                <div className="bg-slate-600 text-white w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 font-bold text-lg">
+                  3
                 </div>
-                <div className="text-center">
-                  <div className="bg-gradient-to-br from-sage-500 to-sage-600 text-white w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center font-black text-xl shadow-lg border-4 border-white">
-                    2
-                  </div>
-                  <h4 className="text-lg font-bold mb-2 text-charcoal-800">
-                    Capture
-                  </h4>
-                  <p className="text-sm text-charcoal-600">
-                    Take photos with 3-second countdown
-                  </p>
-                </div>
-                <div className="text-center">
-                  <div className="bg-gradient-to-br from-charcoal-500 to-charcoal-600 text-white w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center font-black text-xl shadow-lg border-4 border-white">
-                    3
-                  </div>
-                  <h4 className="text-lg font-bold mb-2 text-charcoal-800">
-                    Share
-                  </h4>
-                  <p className="text-sm text-charcoal-600">
-                    Compose, download & share via WhatsApp
-                  </p>
-                </div>
+                <h4 className="text-heading-5 mb-2 text-slate-800">
+                  Save & Share
+                </h4>
+                <p className="text-body-small text-slate-600">
+                  Download, upload to cloud, or send via WhatsApp
+                </p>
               </div>
             </div>
           )}

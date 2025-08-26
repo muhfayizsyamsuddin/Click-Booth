@@ -1,6 +1,9 @@
 "use client";
 
+import { TOKEN_PACKAGES } from "@/helpers/tokenPackage";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import Footer from "@/components/Footer";
 
 declare global {
   interface Window {
@@ -23,35 +26,33 @@ export default function PaymentPage() {
   const [loading, setLoading] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<string>("basic");
 
-  const packages = [
-    {
-      id: "basic",
-      name: "Basic Pack",
-      tokens: 10,
-      price: 50000,
-      description: "10 tokens for basic photo editing features",
-      popular: false,
-      color: "charcoal-600",
-    },
-    {
-      id: "pro",
-      name: "Pro Pack",
-      tokens: 25,
-      price: 100000,
-      description: "25 tokens with advanced filters and effects",
-      popular: true,
-      color: "coral-600",
-    },
-    {
-      id: "premium",
-      name: "Premium Pack",
-      tokens: 50,
-      price: 180000,
-      description: "50 tokens with premium templates and unlimited downloads",
-      popular: false,
-      color: "sage-600",
-    },
-  ];
+  const packages = (
+    Object.entries(TOKEN_PACKAGES) as [
+      keyof typeof TOKEN_PACKAGES,
+      { price: number; tokens: number }
+    ][]
+  ).map(([id, data]) => {
+    return {
+      id,
+      name:
+        id === "basic"
+          ? "Basic Pack"
+          : id === "pro"
+          ? "Pro Pack"
+          : "Premium Pack",
+      tokens: data.tokens,
+      price: data.price,
+      description:
+        id === "basic"
+          ? "10 tokens for basic photo editing features"
+          : id === "pro"
+          ? "30 tokens with advanced filters and effects"
+          : "50 tokens with premium templates and unlimited downloads",
+      popular: id === "pro", // contoh: jadikan Pro sebagai popular
+      color:
+        id === "basic" ? "slate-600" : id === "pro" ? "red-500" : "amber-500",
+    };
+  });
 
   useEffect(() => {
     if (!document.querySelector("script[data-midtrans-snap]")) {
@@ -79,7 +80,7 @@ export default function PaymentPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          amount,
+          packageType: selectedPackage,
           itemName: selectedPkg?.name || "Token Package",
           itemId: selectedPackage,
         }),
@@ -122,146 +123,280 @@ export default function PaymentPage() {
   const selectedPkg = packages.find((p) => p.id === selectedPackage);
 
   return (
-    <div className="min-h-screen bg-cream-100">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="min-h-screen bg-amber-50"
+    >
       {/* Header */}
-      <div className="bg-white border-b border-charcoal-200 shadow-sm">
-        <div className="container py-4">
-          <h1 className="text-heading-2 text-center">Token Packages</h1>
-          <p className="text-center text-body mt-1">
+      <motion.div
+        initial={{ y: -50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.1 }}
+        className="bg-white border-b border-amber-200 shadow-sm"
+      >
+        <div className="container py-6">
+          <motion.h1
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-4xl font-bold text-center text-slate-800"
+          >
+            Token Packages
+          </motion.h1>
+          <motion.p
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="text-center text-lg mt-2 text-slate-600"
+          >
             Choose your perfect package and unlock premium features
-          </p>
+          </motion.p>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="container py-8">
+      <div className="container py-12">
         {/* Package Selection */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {packages.map((pkg) => (
-            <div
+        <motion.div
+          initial={{ y: 50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12"
+        >
+          {packages.map((pkg, index) => (
+            <motion.div
               key={pkg.id}
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.5 + index * 0.1 }}
+              whileHover={{
+                scale: 1.03,
+                y: -5,
+                transition: { duration: 0.2 },
+              }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => handlePackageSelect(pkg)}
-              className={`card cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg ${
+              className={`relative bg-white rounded-2xl shadow-xl border cursor-pointer transition-all duration-300 overflow-hidden ${
                 selectedPackage === pkg.id
-                  ? "border-coral-500 ring-4 ring-coral-500/20"
-                  : "border-charcoal-200 hover:border-coral-300"
+                  ? "border-red-500 ring-4 ring-red-500/20 shadow-2xl"
+                  : "border-amber-200 hover:border-red-300 hover:shadow-2xl"
               }`}
             >
               {pkg.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-coral-600 text-white px-4 py-1 rounded-full text-sm font-semibold shadow-lg">
+                <motion.div
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 0.8 + index * 0.1 }}
+                  className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10"
+                >
+                  <span className="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
                     🔥 Most Popular
                   </span>
-                </div>
+                </motion.div>
               )}
 
-              <div className="p-8">
-                <div
-                  className={`w-16 h-16 rounded-2xl bg-${pkg.color} flex items-center justify-center mb-4 mx-auto`}
+              <div className="p-8 text-center">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.5, delay: 0.7 + index * 0.1 }}
+                  className={`w-20 h-20 rounded-3xl bg-${pkg.color} flex items-center justify-center mb-6 mx-auto shadow-lg`}
                 >
-                  <span className="text-xl font-bold text-white">
+                  <span className="text-2xl font-bold text-white">
                     {pkg.tokens}
                   </span>
-                </div>
+                </motion.div>
 
-                <h3 className="text-heading-3 text-center mb-2">{pkg.name}</h3>
-                <p className="text-body text-center mb-4">{pkg.description}</p>
+                <motion.h3
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 0.8 + index * 0.1 }}
+                  className="text-2xl font-bold mb-3 text-slate-800"
+                >
+                  {pkg.name}
+                </motion.h3>
 
-                <div className="text-center mb-6">
-                  <div className="text-2xl font-bold text-warmRed-700">
+                <motion.p
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 0.9 + index * 0.1 }}
+                  className="mb-6 text-slate-600 leading-relaxed"
+                >
+                  {pkg.description}
+                </motion.p>
+
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 1.0 + index * 0.1 }}
+                  className="mb-8"
+                >
+                  <div className="text-3xl font-bold text-red-600 mb-1">
                     Rp {pkg.price.toLocaleString("id-ID")}
                   </div>
-                  <div className="text-body-small">
+                  <div className="text-sm text-slate-500">
                     Rp{" "}
                     {Math.round(pkg.price / pkg.tokens).toLocaleString("id-ID")}{" "}
                     per token
                   </div>
-                </div>
+                </motion.div>
 
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-warmRed-500 rounded-full"></div>
-                    <span className="text-body">
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 1.1 + index * 0.1 }}
+                  className="space-y-4"
+                >
+                  <div className="flex items-center space-x-3">
+                    <motion.div
+                      whileHover={{ scale: 1.2 }}
+                      className="w-3 h-3 bg-red-500 rounded-full"
+                    ></motion.div>
+                    <span className="text-slate-600 font-medium">
                       {pkg.tokens} Tokens included
                     </span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-warmRed-500 rounded-full"></div>
-                    <span className="text-body">Premium photo filters</span>
+                  <div className="flex items-center space-x-3">
+                    <motion.div
+                      whileHover={{ scale: 1.2 }}
+                      className="w-3 h-3 bg-red-500 rounded-full"
+                    ></motion.div>
+                    <span className="text-slate-600 font-medium">
+                      Premium photo filters
+                    </span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-warmRed-500 rounded-full"></div>
-                    <span className="text-body">WhatsApp sharing</span>
+                  <div className="flex items-center space-x-3">
+                    <motion.div
+                      whileHover={{ scale: 1.2 }}
+                      className="w-3 h-3 bg-red-500 rounded-full"
+                    ></motion.div>
+                    <span className="text-slate-600 font-medium">
+                      WhatsApp sharing
+                    </span>
                   </div>
                   {pkg.id !== "basic" && (
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-warmRed-500 rounded-full"></div>
-                      <span className="text-body">Advanced editing tools</span>
+                    <div className="flex items-center space-x-3">
+                      <motion.div
+                        whileHover={{ scale: 1.2 }}
+                        className="w-3 h-3 bg-red-500 rounded-full"
+                      ></motion.div>
+                      <span className="text-slate-600 font-medium">
+                        Advanced editing tools
+                      </span>
                     </div>
                   )}
                   {pkg.id === "premium" && (
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-warmRed-500 rounded-full"></div>
-                      <span className="text-body">Unlimited downloads</span>
+                    <div className="flex items-center space-x-3">
+                      <motion.div
+                        whileHover={{ scale: 1.2 }}
+                        className="w-3 h-3 bg-red-500 rounded-full"
+                      ></motion.div>
+                      <span className="text-slate-600 font-medium">
+                        Unlimited downloads
+                      </span>
                     </div>
                   )}
-                </div>
+                </motion.div>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         {/* Payment Summary */}
-        <div className="card p-8 mb-8">
-          <h2 className="text-heading-3 mb-6 text-center">
+        <motion.div
+          initial={{ y: 50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.8, delay: 1.0 }}
+          className="bg-white rounded-2xl shadow-xl border border-amber-200 p-8 mb-12"
+        >
+          <motion.h2
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 1.1 }}
+            className="text-3xl font-bold mb-8 text-center text-slate-800"
+          >
             🛒 Payment Summary
-          </h2>
+          </motion.h2>
 
           <div className="max-w-md mx-auto">
-            <div className="bg-cream-50 rounded-2xl p-6 mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-body font-medium">Selected Package:</span>
-                <span className="text-body-strong">{selectedPkg?.name}</span>
-              </div>
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-body font-medium">Tokens:</span>
-                <span className="text-body-strong">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.6, delay: 1.2 }}
+              className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl p-8 mb-8 border border-amber-200 shadow-inner"
+            >
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.5, delay: 1.3 }}
+                className="flex items-center justify-between mb-4"
+              >
+                <span className="text-lg font-medium text-slate-600">
+                  Selected Package:
+                </span>
+                <span className="text-lg font-bold text-slate-800">
+                  {selectedPkg?.name}
+                </span>
+              </motion.div>
+
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.5, delay: 1.4 }}
+                className="flex items-center justify-between mb-4"
+              >
+                <span className="text-lg font-medium text-slate-600">
+                  Tokens:
+                </span>
+                <span className="text-lg font-bold text-slate-800">
                   {selectedPkg?.tokens} tokens
                 </span>
-              </div>
-              <div className="flex items-center justify-between text-lg">
-                <span className="text-body font-medium">Total Amount:</span>
-                <span className="text-body-strong text-coral-600">
+              </motion.div>
+
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.5, delay: 1.5 }}
+                className="flex items-center justify-between text-xl pt-4 border-t border-amber-300"
+              >
+                <span className="text-xl font-medium text-slate-600">
+                  Total Amount:
+                </span>
+                <span className="text-2xl font-bold text-red-600">
                   Rp {amount.toLocaleString("id-ID")}
                 </span>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
 
-            <div className="space-y-4">
-              <div>
-                <label
-                  htmlFor="amount"
-                  className="block text-body font-medium mb-2"
-                >
-                  Custom Amount (optional)
-                </label>
-                <input
-                  id="amount"
-                  type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(Number(e.target.value))}
-                  className="input w-full"
-                  placeholder="Enter custom amount"
-                />
-              </div>
-
-              <button
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.6, delay: 1.6 }}
+              className="space-y-4"
+            >
+              <motion.button
                 onClick={handlePay}
                 disabled={loading || !amount || amount <= 0}
-                className="btn btn-primary w-full text-lg py-4 flex items-center justify-center space-x-3"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={`w-full flex items-center justify-center gap-3 py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 shadow-xl ${
+                  loading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white hover:shadow-2xl"
+                }`}
               >
                 {loading ? (
                   <>
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{
+                        duration: 1,
+                        repeat: Infinity,
+                        ease: "linear",
+                      }}
+                      className="w-6 h-6 border-2 border-white border-t-transparent rounded-full"
+                    />
                     <span>Processing...</span>
                   </>
                 ) : (
@@ -270,45 +405,94 @@ export default function PaymentPage() {
                     <span>Pay with Midtrans</span>
                   </>
                 )}
-              </button>
-            </div>
+              </motion.button>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Security Info */}
-        <div className="bg-cream-50 rounded-3xl p-8 border border-charcoal-200">
-          <h3 className="text-heading-3 mb-4 text-center">🔒 Secure Payment</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <div className="bg-coral-500 text-white w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-                🛡️
-              </div>
-              <h4 className="text-body-strong mb-2">SSL Protected</h4>
-              <p className="text-body-small">
+        <motion.div
+          initial={{ y: 50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.8, delay: 1.7 }}
+          className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-3xl p-10 border border-amber-200 shadow-xl"
+        >
+          <motion.h3
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 1.8 }}
+            className="text-3xl font-bold mb-8 text-center text-slate-800"
+          >
+            🔒 Secure Payment
+          </motion.h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <motion.div
+              initial={{ y: 30, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.6, delay: 1.9 }}
+              className="text-center"
+            >
+              <motion.div
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                whileTap={{ scale: 0.95 }}
+                className="bg-gradient-to-br from-red-500 to-red-600 text-white w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"
+              >
+                <span className="text-2xl">🛡️</span>
+              </motion.div>
+              <h4 className="text-xl font-semibold mb-3 text-slate-800">
+                SSL Protected
+              </h4>
+              <p className="text-slate-600 leading-relaxed">
                 Your payment data is encrypted and secure
               </p>
-            </div>
-            <div className="text-center">
-              <div className="bg-sage-600 text-white w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-                🏦
-              </div>
-              <h4 className="text-body-strong mb-2">Trusted Gateway</h4>
-              <p className="text-body-small">
+            </motion.div>
+
+            <motion.div
+              initial={{ y: 30, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.6, delay: 2.0 }}
+              className="text-center"
+            >
+              <motion.div
+                whileHover={{ scale: 1.1, rotate: -5 }}
+                whileTap={{ scale: 0.95 }}
+                className="bg-gradient-to-br from-amber-500 to-amber-600 text-white w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"
+              >
+                <span className="text-2xl">🏦</span>
+              </motion.div>
+              <h4 className="text-xl font-semibold mb-3 text-slate-800">
+                Trusted Gateway
+              </h4>
+              <p className="text-slate-600 leading-relaxed">
                 Powered by Midtrans payment system
               </p>
-            </div>
-            <div className="text-center">
-              <div className="bg-coral-600 text-white w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-                ⚡
-              </div>
-              <h4 className="text-body-strong mb-2">Instant Tokens</h4>
-              <p className="text-body-small">
+            </motion.div>
+
+            <motion.div
+              initial={{ y: 30, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.6, delay: 2.1 }}
+              className="text-center"
+            >
+              <motion.div
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                whileTap={{ scale: 0.95 }}
+                className="bg-gradient-to-br from-slate-600 to-slate-700 text-white w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"
+              >
+                <span className="text-2xl">⚡</span>
+              </motion.div>
+              <h4 className="text-xl font-semibold mb-3 text-slate-800">
+                Instant Tokens
+              </h4>
+              <p className="text-slate-600 leading-relaxed">
                 Tokens added immediately after payment
               </p>
-            </div>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
       </div>
-    </div>
+      <Footer />
+    </motion.div>
   );
 }
