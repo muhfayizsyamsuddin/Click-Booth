@@ -32,24 +32,32 @@ export default function LoginPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-      const data = await res.json();
+
+      let data: any = null;
+      try {
+        data = await res.json();
+      } catch {
+        data = null;
+      }
 
       if (!res.ok) {
-        setMessage(data.message || "Login failed");
+        setMessage(data?.message || "Login failed");
         setMessageType("error");
         setLoading(false);
         return;
       }
 
-      if (data?.userId) {
-        localStorage.setItem("x-user-id", String(data.userId));
+      // optional: immediately validate and warm /api/me (trusted)
+      try {
+        await fetch("/api/me", { method: "GET", credentials: "include" });
+      } catch {
+        /* ignore */
       }
 
       setMessage("Login successful! Redirecting...");
       setMessageType("success");
       setTimeout(() => router.push("/booth"), 600);
     } catch (err) {
-      console.log("Login error:", err);
       setMessage("An error occurred during login.");
       setMessageType("error");
     } finally {
