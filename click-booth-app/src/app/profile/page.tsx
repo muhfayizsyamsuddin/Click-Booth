@@ -778,7 +778,9 @@ export default function ProfilePage() {
                         )}
 
                         <Image
-                          src={photo.thumbUrl ?? photo.url}
+                          src={
+                            photo.thumbUrl || photo.url || "/placeholder.svg"
+                          }
                           alt="Photo"
                           fill
                           className="object-cover group-hover:scale-110 transition-transform duration-500"
@@ -888,7 +890,11 @@ export default function ProfilePage() {
                         >
                           <div className="w-20 h-20 rounded-2xl overflow-hidden relative shadow-lg">
                             <Image
-                              src={photo.thumbUrl ?? photo.url}
+                              src={
+                                photo.thumbUrl ||
+                                photo.url ||
+                                "/placeholder.svg"
+                              }
                               alt="Photo thumbnail"
                               fill
                               className="object-cover group-hover:scale-110 transition-transform duration-500"
@@ -1055,7 +1061,7 @@ export default function ProfilePage() {
                 className="relative bg-gray-100 rounded-2xl overflow-hidden mb-6"
               >
                 <Image
-                  src={selected.url}
+                  src={selected.url || "/placeholder.svg"}
                   alt="Full size photo"
                   width={800}
                   height={600}

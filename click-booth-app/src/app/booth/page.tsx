@@ -1,6 +1,20 @@
 "use client";
-import React, { JSX, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import {
+  Camera,
+  Filter,
+  Play,
+  RotateCcw,
+  Edit3,
+  Zap,
+  Sparkles,
+  BookOpen,
+  ChevronDown,
+  Loader2,
+  AlertCircle,
+} from "lucide-react";
 
 const AVAILABLE_FILTERS: { id: string; label: string; css: string }[] = [
   { id: "none", label: "None", css: "none" },
@@ -18,42 +32,6 @@ const LAYOUTS = [
   { id: "quad-horizontal", label: "Quad Horizontal", cols: 2, poses: 4 },
 ];
 
-function LayoutPreview({ layoutId }: { layoutId: string }) {
-  const layout = LAYOUTS.find((l) => l.id === layoutId) ?? LAYOUTS[0];
-  const cols = layout.cols || 1;
-  const poses = layout.poses;
-  const boxes: JSX.Element[] = [];
-
-  for (let i = 0; i < poses; i++) {
-    boxes.push(
-      <div
-        key={i}
-        className="bg-coral-100 border-2 border-coral-300 rounded flex items-center justify-center text-coral-700 text-xs font-bold shadow-sm"
-        style={{
-          width: cols === 1 ? "100%" : "48%",
-          height: 16,
-          margin: "2px",
-        }}
-      >
-        {i + 1}
-      </div>
-    );
-  }
-  return (
-    <div className="bg-gradient-to-br from-white to-cream-50 rounded-lg border-2 border-coral-200 shadow-lg p-3 w-24">
-      <div
-        className="flex flex-wrap justify-center items-center mb-2"
-        style={{ minHeight: "50px" }}
-      >
-        {boxes}
-      </div>
-      <div className="text-xs text-coral-600 text-center font-bold bg-coral-50 rounded px-2 py-1">
-        {layout.poses} poses
-      </div>
-    </div>
-  );
-}
-
 export default function BoothPage() {
   const router = useRouter();
 
@@ -65,6 +43,8 @@ export default function BoothPage() {
   const [runningCountdown, setRunningCountdown] = useState(false);
   const [countdown, setCountdown] = useState(3);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [cameraError, setCameraError] = useState<string | null>(null);
 
   const [shotsCount, setShotsCount] = useState<number>(LAYOUTS[0].poses);
   const [selectedLayout, setSelectedLayout] = useState<string>(LAYOUTS[0].id);
@@ -153,6 +133,8 @@ export default function BoothPage() {
   }, [router]);
 
   async function startCamera() {
+    setIsLoading(true);
+    setCameraError(null);
     try {
       if (streamRef.current) {
         if (
@@ -164,10 +146,18 @@ export default function BoothPage() {
         try {
           await videoRef.current?.play();
         } catch {}
+        setIsLoading(false);
         return;
       }
+
+      // Enhanced camera constraints for better performance
       const s = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user" },
+        video: {
+          facingMode: "user",
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          frameRate: { ideal: 30 },
+        },
       });
       streamRef.current = s;
       if (videoRef.current) {
@@ -180,6 +170,7 @@ export default function BoothPage() {
               canvas.width = vid.videoWidth || 480;
               canvas.height = vid.videoHeight || 360;
             }
+            setIsLoading(false);
           } catch {}
         };
         try {
@@ -188,7 +179,8 @@ export default function BoothPage() {
       }
     } catch (e) {
       console.error("camera error", e);
-      console.log("Gagal akses kamera.");
+      setCameraError("Failed to access camera. Please check permissions.");
+      setIsLoading(false);
     }
   }
 
@@ -208,6 +200,56 @@ export default function BoothPage() {
     setRunningCountdown(false);
     setCountdown(3);
   }
+
+  // Keyboard navigation and accessibility
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Space bar to capture
+      if (
+        e.code === "Space" &&
+        !runningCountdown &&
+        !finalComposed &&
+        !previewCaptured
+      ) {
+        e.preventDefault();
+        startCountdown();
+      }
+      // Escape to cancel/retake
+      if (e.code === "Escape") {
+        e.preventDefault();
+        if (runningCountdown) {
+          clearTimer();
+        } else if (previewCaptured && !finalComposed) {
+          retakeCurrentShot();
+        } else if (finalComposed) {
+          retakeAllPhotos();
+        }
+      }
+      // Enter to proceed
+      if (e.code === "Enter") {
+        e.preventDefault();
+        if (
+          previewCaptured &&
+          !finalComposed &&
+          capturedDataUrls.length >= shotsCount
+        ) {
+          composeFinal().catch((e) => console.warn(e));
+        } else if (finalComposed) {
+          goToEditPhotos();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    runningCountdown,
+    finalComposed,
+    previewCaptured,
+    capturedDataUrls.length,
+    shotsCount,
+  ]);
 
   function startCountdown() {
     if (runningCountdown) return;
@@ -493,245 +535,457 @@ export default function BoothPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cream-50 to-cream-100">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 overflow-hidden"
+    >
       {/* Main Camera Section */}
-      <div className="container mx-auto px-6 py-6">
-        <div className="max-w-4xl mx-auto">
-          {/* Camera Container */}
-          <div className="bg-white rounded-2xl shadow-2xl border-4 border-coral-200 overflow-hidden mb-6">
-            {/* Camera Status Bar */}
-            <div className="bg-gradient-to-r from-coral-500 to-coral-600 px-6 py-3">
-              <div className="flex items-center justify-between text-white">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse shadow-lg"></div>
-                    <span className="font-bold text-sm tracking-wide">
-                      CAMERA READY
-                    </span>
-                  </div>
-                  {capturedDataUrls.length > 0 && (
-                    <div className="bg-white/20 px-3 py-1 rounded-full">
-                      <span className="text-xs font-bold">
-                        {capturedDataUrls.length}/{shotsCount} CAPTURED
-                      </span>
+      <div className="container mx-auto px-4 md:px-6 py-4 md:py-6 h-full">
+        <div className="max-w-7xl mx-auto h-full flex flex-col">
+          {/* Header Section */}
+          <motion.div
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="text-center mb-4 md:mb-6 mt-6 md:mt-12 flex-shrink-0"
+          >
+            <motion.h1
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+              className="text-2xl md:text-3xl lg:text-4xl font-black mb-3 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 bg-clip-text text-transparent leading-[1.1]"
+            >
+              Photo Booth Session
+            </motion.h1>
+
+            {/* Layout Info */}
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+              className="inline-flex items-center gap-2 md:gap-4 px-4 md:px-6 py-2 md:py-3 bg-white rounded-2xl shadow-lg border border-slate-200/50"
+            >
+              <Camera className="w-4 md:w-5 h-4 md:h-5 text-slate-600" />
+              <div className="text-sm text-slate-600">Layout:</div>
+              <div className="font-bold text-slate-900">
+                {LAYOUTS.find((l) => l.id === selectedLayout)?.label}
+              </div>
+              <div className="w-1 h-1 bg-slate-400 rounded-full hidden md:block"></div>
+              <div className="text-sm text-slate-600">
+                {shotsCount} {shotsCount === 1 ? "Photo" : "Photos"}
+              </div>
+            </motion.div>
+          </motion.div>
+
+          {/* Main Content - Grid Layout dengan Sidebar */}
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.5, duration: 0.5 }}
+            className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6 flex-1 min-h-0"
+          >
+            {/* Camera Section - Takes 3 columns */}
+            <motion.div
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.6, duration: 0.5 }}
+              className="lg:col-span-3 flex flex-col order-2 lg:order-1"
+            >
+              {/* Camera Container */}
+              <div className="bg-white rounded-3xl shadow-2xl border border-slate-200/50 overflow-hidden flex-1 flex flex-col">
+                {/* Camera Status Bar */}
+                <div className="bg-gradient-to-r from-red-600 to-red-500 px-4 md:px-6 py-3 flex-shrink-0">
+                  <div className="flex items-center justify-between text-white">
+                    <div className="flex items-center gap-2 md:gap-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse shadow-lg"></div>
+                        <span className="font-bold text-sm tracking-wide">
+                          CAMERA READY
+                        </span>
+                      </div>
+                      {capturedDataUrls.length > 0 && (
+                        <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full border border-white/30">
+                          <span className="text-xs font-bold">
+                            {capturedDataUrls.length}/{shotsCount} CAPTURED
+                          </span>
+                        </div>
+                      )}
                     </div>
-                  )}
+                    <div className="text-sm font-bold flex items-center gap-2">
+                      <Camera className="w-4 h-4" />
+                      <span>{!finalComposed ? "PHOTO BOOTH" : "COMPLETE"}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="text-sm font-bold">
-                  {!finalComposed ? "📸 PHOTO BOOTH" : "✨ COMPOSED"}
-                </div>
-              </div>
-            </div>
 
-            {/* Camera Display */}
-            <div className="relative bg-gradient-to-br from-charcoal-800 to-charcoal-900 p-4">
-              <div
-                className="relative bg-black rounded-xl overflow-hidden shadow-inner border-4 border-charcoal-700"
-                style={{ minHeight: "280px", aspectRatio: "16/10" }}
-              >
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  muted
-                  playsInline
-                  style={{
-                    display:
-                      finalComposed || previewCaptured ? "none" : "block",
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    filter:
-                      AVAILABLE_FILTERS.find((f) => f.id === selectedFilter)
-                        ?.css ?? "none",
-                  }}
-                />
-                <canvas
-                  ref={canvasRef}
-                  aria-hidden={!finalComposed && !previewCaptured}
-                  style={{
-                    display:
-                      finalComposed || previewCaptured ? "block" : "none",
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "contain",
-                    backgroundColor: "#000",
-                  }}
-                />
+                {/* Camera Display */}
+                <div className="relative bg-gradient-to-br from-slate-100 to-slate-200 p-4 flex-1 flex items-center justify-center">
+                  <div
+                    className="relative bg-black rounded-2xl overflow-hidden shadow-2xl border border-slate-300 w-full max-h-full"
+                    style={{ aspectRatio: "16/10" }}
+                  >
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      muted
+                      playsInline
+                      aria-label="Camera feed for photo booth"
+                      style={{
+                        display:
+                          finalComposed ||
+                          previewCaptured ||
+                          isLoading ||
+                          cameraError
+                            ? "none"
+                            : "block",
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        filter:
+                          AVAILABLE_FILTERS.find((f) => f.id === selectedFilter)
+                            ?.css ?? "none",
+                      }}
+                    />
+                    <canvas
+                      ref={canvasRef}
+                      aria-hidden={!finalComposed && !previewCaptured}
+                      style={{
+                        display:
+                          finalComposed || previewCaptured ? "block" : "none",
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                        backgroundColor: "#000",
+                      }}
+                    />
 
-                {/* Countdown Overlay */}
-                {!previewCaptured && !finalComposed && runningCountdown && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                    <div className="bg-gradient-to-br from-coral-500 to-coral-600 w-20 h-20 rounded-full flex items-center justify-center shadow-2xl border-4 border-white animate-pulse">
-                      <span className="text-white text-2xl font-black">
-                        {countdown}
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Camera Controls */}
-                {!previewCaptured && !finalComposed && !runningCountdown && (
-                  <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2">
-                    <div className="flex items-center gap-4">
-                      <button
-                        onClick={startCamera}
-                        className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-6 py-3 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-xl transform hover:scale-105 border-2 border-gray-500"
+                    {/* Loading State */}
+                    {isLoading && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="absolute inset-0 flex items-center justify-center bg-black/80"
                       >
-                        🎥 Start Camera
-                      </button>
-                      <button
-                        onClick={startCountdown}
-                        disabled={runningCountdown}
-                        className="bg-gradient-to-r from-coral-500 to-coral-600 hover:from-coral-600 hover:to-coral-700 text-white px-8 py-3 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 border-2 border-coral-400"
-                      >
-                        📸 CAPTURE
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Camera Filter Section */}
-          <div className="bg-gradient-to-r from-white to-cream-50 rounded-2xl shadow-xl border-4 border-coral-200 p-6 mb-6">
-            <div className="text-center">
-              <h3 className="text-lg font-bold text-charcoal-800 mb-4 tracking-wide">
-                🎨 CAMERA FILTER
-              </h3>
-              <div className="flex justify-center">
-                <select
-                  value={selectedFilter}
-                  onChange={(e) => setSelectedFilter(e.target.value)}
-                  className="px-6 py-3 border-2 border-coral-300 rounded-full text-base font-medium bg-white focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-200 transition-all shadow-md hover:shadow-lg min-w-48"
-                >
-                  {AVAILABLE_FILTERS.map((f) => (
-                    <option key={f.id} value={f.id}>
-                      {f.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Simplified Action Section */}
-          {(previewCaptured || finalComposed) && (
-            <div className="bg-gradient-to-r from-white to-cream-50 rounded-2xl shadow-xl border-4 border-coral-200 p-8 mb-6">
-              <div className="text-center mb-6">
-                <h2 className="text-2xl font-black text-charcoal-800 mb-2">
-                  {previewCaptured && !finalComposed
-                    ? "📷 Photo Captured!"
-                    : finalComposed
-                    ? "� All Photos Complete!"
-                    : "✨ Session Complete!"}
-                </h2>
-                <p className="text-lg text-charcoal-600">
-                  {previewCaptured && !finalComposed
-                    ? "Review your photo and continue or retake"
-                    : finalComposed
-                    ? "What would you like to do next?"
-                    : "Great work! Your photos are ready for editing and sharing"}
-                </p>
-              </div>
-
-              <div className="flex flex-wrap items-center justify-center gap-4">
-                {previewCaptured && !finalComposed && (
-                  <>
-                    <button
-                      onClick={retakeCurrentShot}
-                      className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-8 py-4 rounded-full font-bold text-lg transition-all shadow-xl hover:shadow-2xl transform hover:scale-110 border-2 border-orange-400"
-                    >
-                      🔄 Retake This Photo
-                    </button>
-                    {capturedDataUrls.length < shotsCount ? (
-                      <button
-                        onClick={() => {
-                          setPreviewCaptured(null);
-                          startCamera();
-                        }}
-                        className="bg-gradient-to-r from-coral-500 to-coral-600 hover:from-coral-600 hover:to-coral-700 text-white px-8 py-4 rounded-full font-bold text-lg transition-all shadow-xl hover:shadow-2xl transform hover:scale-110 border-2 border-coral-400"
-                      >
-                        ➡️ Continue to Next Photo ({capturedDataUrls.length}/
-                        {shotsCount})
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() =>
-                          composeFinal().catch((e) => console.warn(e))
-                        }
-                        className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-8 py-4 rounded-full font-bold text-lg transition-all shadow-xl hover:shadow-2xl transform hover:scale-110 border-2 border-green-400"
-                      >
-                        ✨ Complete Session
-                      </button>
+                        <div className="text-center text-white">
+                          <Loader2 className="w-12 h-12 mx-auto mb-4 animate-spin" />
+                          <p className="text-lg font-medium">
+                            Initializing Camera...
+                          </p>
+                          <p className="text-sm text-white/80 mt-2">
+                            Please allow camera access
+                          </p>
+                        </div>
+                      </motion.div>
                     )}
-                  </>
-                )}
-                {finalComposed && (
-                  <>
-                    <button
-                      onClick={retakeAllPhotos}
-                      className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-8 py-4 rounded-full font-bold text-lg transition-all shadow-xl hover:shadow-2xl transform hover:scale-110 border-2 border-red-400"
-                    >
-                      🔄 Retake All Photos
-                    </button>
-                    <button
-                      onClick={goToEditPhotos}
-                      className="bg-gradient-to-r from-sage-500 to-sage-600 hover:from-sage-600 hover:to-sage-700 text-white px-8 py-4 rounded-full font-bold text-lg transition-all shadow-xl hover:shadow-2xl transform hover:scale-110 border-2 border-sage-400"
-                    >
-                      ✨ Edit Photos
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-          )}
 
-          {/* Instructions */}
-          {!previewCaptured && !finalComposed && (
-            <div className="bg-gradient-to-br from-white to-cream-50 rounded-2xl shadow-xl border-4 border-coral-200 p-6">
-              <h3 className="text-lg font-bold mb-6 text-center text-charcoal-800 tracking-wide">
-                🎯 QUICK GUIDE
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="text-center">
-                  <div className="bg-gradient-to-br from-coral-500 to-coral-600 text-white w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center font-black text-xl shadow-lg border-4 border-white">
-                    1
+                    {/* Error State */}
+                    {cameraError && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="absolute inset-0 flex items-center justify-center bg-black/80"
+                      >
+                        <div className="text-center text-white max-w-md mx-auto p-6">
+                          <AlertCircle className="w-16 h-16 mx-auto mb-4 text-red-400" />
+                          <h3 className="text-xl font-bold mb-2">
+                            Camera Access Required
+                          </h3>
+                          <p className="text-white/80 mb-6">{cameraError}</p>
+                          <button
+                            onClick={startCamera}
+                            className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white px-6 py-3 rounded-2xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                          >
+                            Try Again
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* Countdown Overlay */}
+                    {!previewCaptured &&
+                      !finalComposed &&
+                      !isLoading &&
+                      !cameraError &&
+                      runningCountdown && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                          <div className="bg-gradient-to-br from-red-600 to-red-500 w-24 h-24 rounded-full flex items-center justify-center shadow-2xl border-4 border-white animate-pulse">
+                            <span className="text-white text-3xl font-black">
+                              {countdown}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                    {/* Camera Controls */}
+                    {!previewCaptured &&
+                      !finalComposed &&
+                      !isLoading &&
+                      !cameraError &&
+                      !runningCountdown && (
+                        <motion.div
+                          initial={{ y: 20, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          transition={{ delay: 1, duration: 0.5 }}
+                          className="absolute bottom-6 left-1/2 transform -translate-x-1/2"
+                        >
+                          <div className="flex flex-col items-center gap-4">
+                            <div className="flex items-center gap-4">
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={startCamera}
+                                className="bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white px-6 py-3 rounded-2xl font-bold text-sm transition-all duration-300 shadow-lg hover:shadow-xl border border-slate-500 flex items-center gap-2"
+                                aria-label="Start camera"
+                              >
+                                <Play className="w-4 h-4" />
+                                Start Camera
+                              </motion.button>
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={startCountdown}
+                                disabled={runningCountdown}
+                                className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white px-8 py-3 rounded-2xl font-bold text-sm transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 border border-red-400 flex items-center gap-2"
+                                aria-label="Take photo (Space key)"
+                              >
+                                <Camera className="w-4 h-4" />
+                                CAPTURE
+                              </motion.button>
+                            </div>
+                            {/* Keyboard Hints */}
+                            <motion.div
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              transition={{ delay: 1.5, duration: 0.5 }}
+                              className="text-center"
+                            >
+                              <p className="text-xs text-white/80 bg-black/30 px-3 py-1 rounded-full backdrop-blur-sm">
+                                Press{" "}
+                                <kbd className="bg-white/20 px-1 rounded">
+                                  Space
+                                </kbd>{" "}
+                                to capture •{" "}
+                                <kbd className="bg-white/20 px-1 rounded">
+                                  Esc
+                                </kbd>{" "}
+                                to cancel
+                              </p>
+                            </motion.div>
+                          </div>
+                        </motion.div>
+                      )}
                   </div>
-                  <h4 className="text-lg font-bold mb-2 text-charcoal-800">
-                    Setup
-                  </h4>
-                  <p className="text-sm text-charcoal-600">
-                    Choose layout & filter, then start camera
-                  </p>
-                </div>
-                <div className="text-center">
-                  <div className="bg-gradient-to-br from-sage-500 to-sage-600 text-white w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center font-black text-xl shadow-lg border-4 border-white">
-                    2
-                  </div>
-                  <h4 className="text-lg font-bold mb-2 text-charcoal-800">
-                    Capture
-                  </h4>
-                  <p className="text-sm text-charcoal-600">
-                    Take photos with 3-second countdown
-                  </p>
-                </div>
-                <div className="text-center">
-                  <div className="bg-gradient-to-br from-charcoal-500 to-charcoal-600 text-white w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center font-black text-xl shadow-lg border-4 border-white">
-                    3
-                  </div>
-                  <h4 className="text-lg font-bold mb-2 text-charcoal-800">
-                    Continue
-                  </h4>
-                  <p className="text-sm text-charcoal-600">
-                    Go to editor for advanced editing and sharing options
-                  </p>
                 </div>
               </div>
-            </div>
-          )}
+            </motion.div>
+
+            {/* Sidebar - Takes 1 column */}
+            <motion.div
+              initial={{ x: 20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.7, duration: 0.5 }}
+              className="lg:col-span-1 space-y-4 flex flex-col order-1 lg:order-2"
+            >
+              {/* Camera Filter Section */}
+              <div className="bg-white rounded-3xl shadow-xl border border-slate-200/50 p-4 flex-shrink-0">
+                <div className="text-center">
+                  <h3 className="text-base font-bold text-slate-900 mb-3 flex items-center justify-center gap-2">
+                    <Filter className="w-4 h-4" />
+                    <span>Camera Filter</span>
+                  </h3>
+                  <div className="relative">
+                    <select
+                      value={selectedFilter}
+                      onChange={(e) => setSelectedFilter(e.target.value)}
+                      className="w-full appearance-none px-3 py-2 pr-8 border border-slate-300 rounded-xl text-sm font-medium bg-gradient-to-r from-white to-slate-50 hover:from-slate-50 hover:to-slate-100 focus:border-red-500 focus:outline-none focus:ring-4 focus:ring-red-100 transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer"
+                    >
+                      {AVAILABLE_FILTERS.map((f) => (
+                        <option
+                          key={f.id}
+                          value={f.id}
+                          className="bg-white text-slate-900 py-2"
+                        >
+                          {f.label}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                      <ChevronDown className="w-3 h-3 text-slate-500" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Guide Section */}
+              <div className="bg-white rounded-3xl shadow-xl border border-slate-200/50 p-4 flex-1">
+                <h3 className="text-base font-bold mb-4 text-center text-slate-900 flex items-center justify-center gap-2">
+                  <BookOpen className="w-4 h-4" />
+                  <span>Quick Guide</span>
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-2">
+                    <div className="bg-gradient-to-br from-red-600 to-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs shadow-lg flex-shrink-0">
+                      1
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-900 mb-1 text-sm">
+                        Setup
+                      </h4>
+                      <p className="text-xs text-slate-600">
+                        Choose your filter and start the camera
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <div className="bg-gradient-to-br from-amber-600 to-amber-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs shadow-lg flex-shrink-0">
+                      2
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-900 mb-1 text-sm">
+                        Capture
+                      </h4>
+                      <p className="text-xs text-slate-600">
+                        Take photos with 3-second countdown
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <div className="bg-gradient-to-br from-green-600 to-green-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs shadow-lg flex-shrink-0">
+                      3
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-900 mb-1 text-sm">
+                        Edit
+                      </h4>
+                      <p className="text-xs text-slate-600">
+                        Go to editor for advanced options
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons Section */}
+              {(previewCaptured || finalComposed) && (
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.8, duration: 0.5 }}
+                  className="bg-white rounded-3xl shadow-xl border border-slate-200/50 p-4 flex-shrink-0"
+                >
+                  <h3 className="text-base font-bold mb-4 text-center text-slate-900 flex items-center justify-center gap-2">
+                    {previewCaptured && !finalComposed ? (
+                      <>
+                        <Camera className="w-4 h-4" />
+                        <span>Photo Actions</span>
+                      </>
+                    ) : finalComposed ? (
+                      <>
+                        <Sparkles className="w-4 h-4" />
+                        <span>Session Complete</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4" />
+                        <span>Session Actions</span>
+                      </>
+                    )}
+                  </h3>
+
+                  <div className="space-y-3">
+                    {previewCaptured && !finalComposed && (
+                      <>
+                        <motion.button
+                          initial={{ x: 20, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          transition={{ delay: 0.9, duration: 0.5 }}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={retakeCurrentShot}
+                          className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-4 py-3 rounded-xl font-bold text-sm transition-all duration-300 shadow-lg hover:shadow-xl border border-amber-400 flex items-center gap-2 justify-center"
+                          aria-label="Retake current photo"
+                        >
+                          <RotateCcw className="w-4 h-4" />
+                          Retake This Photo
+                        </motion.button>
+
+                        {capturedDataUrls.length < shotsCount ? (
+                          <motion.button
+                            initial={{ x: 20, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            transition={{ delay: 1.0, duration: 0.5 }}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => {
+                              setPreviewCaptured(null);
+                              startCamera();
+                            }}
+                            className="w-full bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white px-4 py-3 rounded-xl font-bold text-sm transition-all duration-300 shadow-lg hover:shadow-xl border border-red-400 flex items-center gap-2 justify-center"
+                            aria-label="Continue to next photo"
+                          >
+                            <Zap className="w-4 h-4" />
+                            Continue ({capturedDataUrls.length}/{shotsCount})
+                          </motion.button>
+                        ) : (
+                          <motion.button
+                            initial={{ x: 20, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            transition={{ delay: 1.0, duration: 0.5 }}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() =>
+                              composeFinal().catch((e) => console.warn(e))
+                            }
+                            className="w-full bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white px-4 py-3 rounded-xl font-bold text-sm transition-all duration-300 shadow-lg hover:shadow-xl border border-green-400 flex items-center gap-2 justify-center"
+                            aria-label="Complete photo session"
+                          >
+                            <Sparkles className="w-4 h-4" />
+                            Complete Session
+                          </motion.button>
+                        )}
+                      </>
+                    )}
+
+                    {finalComposed && (
+                      <>
+                        <motion.button
+                          initial={{ x: 20, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          transition={{ delay: 0.9, duration: 0.5 }}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={retakeAllPhotos}
+                          className="w-full bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white px-4 py-3 rounded-xl font-bold text-sm transition-all duration-300 shadow-lg hover:shadow-xl border border-slate-500 flex items-center gap-2 justify-center"
+                          aria-label="Retake all photos"
+                        >
+                          <RotateCcw className="w-4 h-4" />
+                          Retake All Photos
+                        </motion.button>
+
+                        <motion.button
+                          initial={{ x: 20, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          transition={{ delay: 1.0, duration: 0.5 }}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={goToEditPhotos}
+                          className="w-full bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white px-4 py-3 rounded-xl font-bold text-sm transition-all duration-300 shadow-lg hover:shadow-xl border border-red-400 flex items-center gap-2 justify-center"
+                          aria-label="Edit photos"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                          Edit Photos
+                        </motion.button>
+                      </>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </motion.div>
+          </motion.div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
