@@ -149,7 +149,7 @@ export default function ComposePage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Layout data from session
-  const [layoutData, setLayoutData] = useState<any>(null);
+  // Removed unused layoutData state
   const [availableFrames, setAvailableFrames] =
     useState<Frame[]>(defaultFrames);
   const [capturedPhotos, setCapturedPhotos] = useState<string[]>([]);
@@ -186,8 +186,6 @@ export default function ComposePage() {
 
       if (savedLayout) {
         const layout = JSON.parse(savedLayout);
-        setLayoutData(layout);
-
         // Generate frames based on layout shots count
         const framesForLayout = generateFramesForLayout(layout.shots);
         setAvailableFrames(framesForLayout);
@@ -476,9 +474,13 @@ export default function ComposePage() {
       setSelectedPhoto(url);
       setActiveCategory("frame"); // kembali ke tab frame untuk lanjut styling jika mau
       fetchCurrentUser(); // refresh user data (token)
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
-      setAiErr(error?.message || "Unexpected error");
+      if (typeof error === "object" && error !== null && "message" in error) {
+        setAiErr((error as { message?: string }).message || "Unexpected error");
+      } else {
+        setAiErr("Unexpected error");
+      }
     } finally {
       setIsGenerating(false);
     }
@@ -518,8 +520,8 @@ export default function ComposePage() {
     setMessage(null);
     try {
       const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
-      const body: any = {
-        imageData: dataUrl,
+      const body = {
+        imageData: dataUrl as string,
         sendToWhatsapp: false, // Only save, don't send WA
         filter: "none",
         shots: 1,
@@ -571,7 +573,13 @@ export default function ComposePage() {
     setMessage(null);
     try {
       const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
-      const body: any = {
+      const body: {
+        imageData: string;
+        sendToWhatsapp: boolean;
+        filter: string;
+        shots: number;
+        layout: string;
+      } = {
         imageData: dataUrl,
         sendToWhatsapp: true, // Request untuk share ke WhatsApp
         filter: "none",
