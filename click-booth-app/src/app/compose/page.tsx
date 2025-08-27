@@ -1,11 +1,27 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { QRCodeCanvas } from "qrcode.react";
 import { AiType, UserType } from "@/type";
 import Swal from "sweetalert2";
-import NextImage from "next/image";
+import Image from "next/image";
+import {
+  Palette,
+  ArrowLeft,
+  Camera,
+  Download,
+  CloudUpload,
+  MessageCircle,
+  Trash2,
+  Image as ImageIcon,
+  Bot,
+  Filter,
+  AlertTriangle,
+  ExternalLink,
+  X,
+  Check,
+} from "lucide-react";
 
 interface Frame {
   id: string;
@@ -62,7 +78,7 @@ function generateFramesForLayout(
     { id: "purple", name: "Purple", background: "#a29bfe", accent: "#6c5ce7" },
     { id: "pink", name: "Pink", background: "#fd79a8", accent: "#e84393" },
     { id: "orange", name: "Orange", background: "#fdcb6e", accent: "#e17055" },
-    { id: "green", name: "Green", background: "#55a3ff", accent: "#00b894" },
+    { id: "green", name: "Green", background: "#00b894", accent: "#00cec9" },
     { id: "sunset", name: "Sunset", background: "#fab1a0", accent: "#e17055" },
   ];
 
@@ -167,7 +183,7 @@ const defaultFrames: Frame[] = [
 
 export default function ComposePage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  // const searchParams = useSearchParams();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Layout data from session
@@ -184,7 +200,7 @@ export default function ComposePage() {
   // === AI States ===
   const [aiList, setAiList] = useState<AiType[]>([]);
   const [aiPrompt, setAiPrompt] = useState<string>("");
-  const [size, setSize] = useState<string>("1024x1024");
+  const [size] = useState<string>("1024x1024");
   const [aiErr, setAiErr] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentUser, setCurrentUser] = useState<UserType>();
@@ -196,13 +212,20 @@ export default function ComposePage() {
   const [loggedIn, setLoggedIn] = useState(false);
 
   // === DB Photo Data ===
-  const [dbPhotoData, setDbPhotoData] = useState<any>(null);
+  interface DbPhotoDataType {
+    url?: string;
+    images?: string[];
+    shots?: number;
+    layout?: string;
+    [key: string]: unknown;
+  }
+  const [dbPhotoData, setDbPhotoData] = useState<DbPhotoDataType | null>(null);
   const [layoutInfo, setLayoutInfo] = useState<{
     shots: number;
     layout: string;
   } | null>(null);
   const [aiGeneratedImage, setAiGeneratedImage] = useState<string | null>(null);
-  const [originalPhotos, setOriginalPhotos] = useState<string[]>([]); // Store original photos without frames
+  // const [originalPhotos, setOriginalPhotos] = useState<string[]>([]); // Store original photos without frames
 
   // === Rendering Control ===
   const [isRendering, setIsRendering] = useState(false);
@@ -248,11 +271,11 @@ export default function ComposePage() {
             // For DB photos, use individual images if available, otherwise main photo
             if (photo.images && photo.images.length > 0) {
               setCapturedPhotos(photo.images);
-              setOriginalPhotos(photo.images); // Store original photos
+              // setOriginalPhotos(photo.images); // Store original photos
               setSelectedPhoto(photo.images[0]);
             } else if (photo.url) {
               setCapturedPhotos([photo.url]);
-              setOriginalPhotos([photo.url]); // Store original photo
+              // setOriginalPhotos([photo.url]); // Store original photo
               setSelectedPhoto(photo.url);
             }
 
@@ -296,7 +319,7 @@ export default function ComposePage() {
           });
 
           setCapturedPhotos(photos);
-          setOriginalPhotos(photos); // Store original photos from sessionStorage
+          // setOriginalPhotos(photos); // Store original photos from sessionStorage
           setLayoutInfo({
             shots: payload.shots || 4,
             layout: payload.layout || "layoutB",
@@ -319,7 +342,7 @@ export default function ComposePage() {
         if (savedPhotos) {
           const photos = JSON.parse(savedPhotos);
           setCapturedPhotos(photos);
-          setOriginalPhotos(photos); // Store original photos
+          // setOriginalPhotos(photos); // Store original photos
         }
 
         if (savedLayout) {
@@ -425,22 +448,48 @@ export default function ComposePage() {
 
   // Redraw on updates with debounce to prevent multiple rapid calls
   useEffect(() => {
-    if (selectedPhoto && canvasRef.current && !isLoading) {
+    if (selectedPhoto && canvasRef.current && !isLoading && !isRendering) {
+      console.log("useEffect triggered for canvas render", {
+        selectedPhoto: !!selectedPhoto,
+        selectedFrameId: selectedFrame.id,
+        aiGeneratedImage: !!aiGeneratedImage,
+        isLoading,
+        isRendering,
+      });
+
       const timeoutId = setTimeout(() => {
         drawComposition();
-      }, 150);
+      }, 200); // Increased debounce time
 
       return () => clearTimeout(timeoutId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedPhoto, selectedFrame, aiGeneratedImage, isLoading]);
+  }, [
+    selectedPhoto,
+    selectedFrame.id,
+    aiGeneratedImage,
+    isLoading,
+    isRendering,
+  ]); // Use selectedFrame.id instead of whole object
 
   const drawComposition = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    // Prevent drawing if already rendering
+    if (isRendering) {
+      console.log("Skipping draw - already rendering");
+      return;
+    }
+
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
+
+    console.log("Drawing composition:", {
+      frameType: selectedFrame.type,
+      frameId: selectedFrame.id,
+      hasAI: !!aiGeneratedImage,
+    });
 
     if (selectedFrame.type === "strip" && selectedFrame.stripConfig) {
       drawPhotoboothStrip(ctx, canvas);
@@ -455,7 +504,7 @@ export default function ComposePage() {
   ) => {
     const config = selectedFrame.stripConfig!;
 
-    console.log("🎬 Drawing strip frame:", {
+    console.log("Drawing strip frame:", {
       frameId: selectedFrame.id,
       frameName: selectedFrame.name,
       frameColor: selectedFrame.stripConfig?.background,
@@ -472,11 +521,10 @@ export default function ComposePage() {
       // Use individual photos from DB if available
       photos = dbPhotoData.images;
     } else if (dbPhotoData) {
-      // For DB photos without individual images, use the main photo repeated
-      // This is a fallback - ideally we'd store individual photos in DB
+      // For DB photos without individual images, use only the main photo (don't repeat)
       const mainPhoto = dbPhotoData.url || selectedPhoto;
       if (mainPhoto) {
-        photos = Array(config.photoCount).fill(mainPhoto);
+        photos = [mainPhoto]; // Only use single photo, don't fill array
       }
     } else {
       // Use sessionStorage or captured photos (original behavior)
@@ -497,6 +545,7 @@ export default function ComposePage() {
               : [];
         }
       } catch (e) {
+        console.log("🚀 ~ drawPhotoboothStrip ~ e:", e);
         photos =
           capturedPhotos.length > 0
             ? capturedPhotos
@@ -528,6 +577,13 @@ export default function ComposePage() {
     const actualPhotoCount = Math.min(photos.length, config.photoCount);
     const photosToUse = photos.slice(0, actualPhotoCount);
 
+    console.log("Photo count control:", {
+      totalPhotosAvailable: photos.length,
+      configPhotoCount: config.photoCount,
+      actualPhotoCount: actualPhotoCount,
+      photosToUseLength: photosToUse.length,
+    });
+
     // Calculate canvas size for strip using actual photo count
     const photoWidth = 300;
     const photoHeight = 200;
@@ -550,7 +606,7 @@ export default function ComposePage() {
     const loadedImages: Promise<HTMLImageElement>[] = photosToUse.map(
       (photoSrc) => {
         return new Promise((resolve) => {
-          const img = new Image();
+          const img = document.createElement("img");
           img.crossOrigin = "anonymous";
           img.onload = () => resolve(img);
           img.onerror = () => resolve(img);
@@ -560,116 +616,119 @@ export default function ComposePage() {
     );
 
     Promise.all(loadedImages).then((images) => {
-      console.log("📸 Images loaded for strip, applying layers:", {
+      console.log("Images loaded for strip, applying layers:", {
         imageCount: images.length,
+        actualPhotoCount: actualPhotoCount,
+        expectedCount: config.photoCount,
         hasAI: !!aiGeneratedImage,
         frameId: selectedFrame.id,
         frameHasSrc: !!selectedFrame.src,
       });
 
-      // First draw all original photos
-      images.forEach((img, index) => {
-        if (config.orientation === "vertical") {
-          const y = 20 + index * (photoHeight + config.spacing);
-          ctx.drawImage(img, 20, y, photoWidth, photoHeight);
-        } else {
-          const x = 20 + index * (photoWidth + config.spacing);
-          ctx.drawImage(img, x, 20, photoWidth, photoHeight);
-        }
-      });
+      // IMPORTANT: If AI is available, DON'T draw original photos first
+      // Only draw AI photos or original photos, not both
 
-      // Apply AI and frame in sequence
+      // Conditional drawing: AI photos OR original photos (not both)
       const applyAIAndFrame = () => {
         if (aiGeneratedImage) {
-          console.log("🎨 Applying AI overlay to strip");
-          const aiImg = new Image();
+          console.log("Drawing AI strip with cropped sections (no duplicates)");
+          const aiImg = document.createElement("img");
           aiImg.crossOrigin = "anonymous";
           aiImg.onload = () => {
-            // Draw AI image over the entire canvas as styled version
-            ctx.drawImage(aiImg, 0, 0, canvas.width, canvas.height);
+            // For strip with AI: crop different sections of AI image for each slot
+            const aiWidth = aiImg.width;
+            const aiHeight = aiImg.height;
 
-            // Apply strip background color overlay after AI
-            if (config.background && config.background !== "transparent") {
-              console.log(
-                "🌈 Applying strip background color after AI:",
-                config.background
+            for (let index = 0; index < actualPhotoCount; index++) {
+              let photoX, photoY;
+              if (config.orientation === "vertical") {
+                photoX = 20;
+                photoY = 20 + index * (photoHeight + config.spacing);
+              } else {
+                photoX = 20 + index * (photoWidth + config.spacing);
+                photoY = 20;
+              }
+
+              // Crop different sections of AI image for variety
+              let sourceX, sourceY, sourceWidth, sourceHeight;
+
+              if (config.orientation === "vertical") {
+                // For vertical strips, crop horizontal sections
+                sourceX = 0;
+                sourceY = (index / actualPhotoCount) * aiHeight;
+                sourceWidth = aiWidth;
+                sourceHeight = aiHeight / actualPhotoCount;
+              } else {
+                // For horizontal strips, crop vertical sections
+                sourceX = (index / actualPhotoCount) * aiWidth;
+                sourceY = 0;
+                sourceWidth = aiWidth / actualPhotoCount;
+                sourceHeight = aiHeight;
+              }
+
+              // Draw cropped section of AI image
+              ctx.drawImage(
+                aiImg,
+                sourceX,
+                sourceY,
+                sourceWidth,
+                sourceHeight, // Source crop
+                photoX,
+                photoY,
+                photoWidth,
+                photoHeight // Destination
               );
-
-              // Create semi-transparent color overlay to show strip color
-              ctx.fillStyle = config.background;
-              ctx.globalAlpha = 0.15; // Semi-transparent to blend with AI
-              ctx.fillRect(0, 0, canvas.width, canvas.height);
-              ctx.globalAlpha = 1.0; // Reset alpha
-
-              console.log("✅ Strip background color applied successfully");
             }
 
             // Apply frame image if it exists (for hybrid frames)
             if (selectedFrame.src) {
-              console.log(
-                "🖼️ Applying frame image after AI:",
-                selectedFrame.name
-              );
-              const frameImg = new Image();
+              console.log("Applying frame image after AI:", selectedFrame.name);
+              const frameImg = document.createElement("img");
               frameImg.onload = () => {
                 ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
-                console.log("✅ Frame image applied successfully after AI");
+                console.log("Frame image applied successfully after AI");
 
-                // Add branding after frame
-                if (config.branding) {
-                  ctx.fillStyle = "#333";
-                  ctx.font = "bold 16px Arial";
-                  ctx.textAlign = "center" as const;
-                  const brandingY =
-                    canvas.height -
-                    (config.orientation === "vertical" ? 15 : 10);
-                  ctx.fillText(config.branding, canvas.width / 2, brandingY);
-                }
+                // Add logo + branding after frame
+                drawLogoAndBranding(ctx, canvas, config);
               };
               frameImg.src = selectedFrame.src;
             } else {
-              console.log("� Adding branding after strip color overlay");
-              // Add branding after color overlay
-              if (config.branding) {
-                ctx.fillStyle = "#333";
-                ctx.font = "bold 16px Arial";
-                ctx.textAlign = "center" as const;
-                const brandingY =
-                  canvas.height - (config.orientation === "vertical" ? 15 : 10);
-                ctx.fillText(config.branding, canvas.width / 2, brandingY);
-              }
+              console.log("  Adding logo + branding after strip color overlay");
+              // Add logo + branding after color overlay
+              drawLogoAndBranding(ctx, canvas, config);
             }
           };
           aiImg.src = aiGeneratedImage;
-        } else if (selectedFrame.src) {
-          // Apply frame directly if no AI
-          console.log("🖼️ Applying frame without AI:", selectedFrame.name);
-          const frameImg = new Image();
-          frameImg.onload = () => {
-            ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
-            console.log("✅ Frame applied successfully without AI");
-
-            // Add branding after frame
-            if (config.branding) {
-              ctx.fillStyle = "#333";
-              ctx.font = "bold 16px Arial";
-              ctx.textAlign = "center" as const;
-              const brandingY =
-                canvas.height - (config.orientation === "vertical" ? 15 : 10);
-              ctx.fillText(config.branding, canvas.width / 2, brandingY);
-            }
-          };
-          frameImg.src = selectedFrame.src;
         } else {
-          // Just branding if no AI and no frame
-          console.log("📝 Applying branding only (no AI, no frame)");
-          if (config.branding) {
-            ctx.fillStyle = "#333";
-            ctx.font = "bold 16px Arial";
-            ctx.textAlign = "center" as const;
-            const brandingY =
-              canvas.height - (config.orientation === "vertical" ? 15 : 10);
-            ctx.fillText(config.branding, canvas.width / 2, brandingY);
+          // No AI - draw original photos ONLY
+          console.log("Drawing original photos only (no AI)");
+          images.slice(0, actualPhotoCount).forEach((img, index) => {
+            if (config.orientation === "vertical") {
+              const y = 20 + index * (photoHeight + config.spacing);
+              ctx.drawImage(img, 20, y, photoWidth, photoHeight);
+            } else {
+              const x = 20 + index * (photoWidth + config.spacing);
+              ctx.drawImage(img, x, 20, photoWidth, photoHeight);
+            }
+          });
+
+          // Apply frame if exists
+          if (selectedFrame.src) {
+            // Apply frame directly if no AI
+            console.log("Applying frame without AI:", selectedFrame.name);
+            const frameImg = document.createElement("img");
+            frameImg.onload = () => {
+              ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
+              console.log("Frame applied successfully without AI");
+
+              // Add logo + branding after frame
+              drawLogoAndBranding(ctx, canvas, config);
+            };
+            frameImg.src = selectedFrame.src;
+          } else {
+            // Just logo + branding if no AI and no frame
+            console.log("📝 Applying logo + branding only (no AI, no frame)");
+            drawLogoAndBranding(ctx, canvas, config);
           }
         }
       };
@@ -678,6 +737,75 @@ export default function ComposePage() {
       applyAIAndFrame();
     });
   };
+
+  // Function to draw logo + branding text
+  const drawLogoAndBranding = (
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    config: Frame["stripConfig"]
+  ) => {
+    if (!config || !config.branding) return;
+
+    const brandingY =
+      canvas.height - (config.orientation === "vertical" ? 15 : 10);
+    const centerX = canvas.width / 2;
+
+    // Try to load and draw logo first
+    const logoImg = document.createElement("img");
+    logoImg.crossOrigin = "anonymous";
+    logoImg.onload = () => {
+      // Draw logo with background handling
+      const logoSize = 24;
+      const logoX = centerX - 60; // Position logo to the left of text
+      const logoY = brandingY - 18;
+
+      // Option 1: Draw circular background to make logo stand out
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(
+        logoX + logoSize / 2,
+        logoY + logoSize / 2,
+        logoSize / 2 + 2,
+        0,
+        2 * Math.PI
+      );
+      ctx.fillStyle = "rgba(255, 255, 255, 0.9)"; // Semi-transparent white background
+      ctx.fill();
+      ctx.strokeStyle = "#ccc";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.restore();
+
+      // Draw logo (crop to reduce white background effect)
+      const cropMargin = 6; // Crop pixels from each side
+      ctx.drawImage(
+        logoImg,
+        cropMargin,
+        cropMargin,
+        logoImg.width - cropMargin * 2,
+        logoImg.height - cropMargin * 2, // Source crop
+        logoX + 3,
+        logoY + 3,
+        logoSize - 6,
+        logoSize - 6 // Destination (smaller to fit in circle)
+      );
+
+      // Draw text next to logo
+      ctx.fillStyle = "#333";
+      ctx.font = "bold 16px Arial";
+      ctx.textAlign = "left" as const;
+      ctx.fillText(config.branding ?? "", logoX + logoSize + 8, brandingY);
+    };
+    logoImg.onerror = () => {
+      // Fallback: just draw text if logo fails to load
+      ctx.fillStyle = "#333";
+      ctx.font = "bold 16px Arial";
+      ctx.textAlign = "center" as const;
+      ctx.fillText(config.branding ?? "", centerX, brandingY);
+    };
+    logoImg.src = "/clickBooth.png"; // Use existing logo from public folder
+  };
+
   const drawRegularFrame = (
     ctx: CanvasRenderingContext2D,
     canvas: HTMLCanvasElement
@@ -712,6 +840,7 @@ export default function ComposePage() {
               : [];
         }
       } catch (e) {
+        console.log("🚀 ~ drawRegularFrame ~ e:", e);
         photos =
           capturedPhotos.length > 0
             ? capturedPhotos
@@ -743,14 +872,14 @@ export default function ComposePage() {
 
       const photoToUse = photos[0];
       if (photoToUse) {
-        const img = new Image();
+        const img = document.createElement("img");
         img.crossOrigin = "anonymous";
         img.onload = () => {
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
           // Apply AI generated image as overlay if available
           if (aiGeneratedImage) {
-            const aiImg = new Image();
+            const aiImg = document.createElement("img");
             aiImg.crossOrigin = "anonymous";
             aiImg.onload = () => {
               // Draw AI image over the original photo
@@ -758,7 +887,7 @@ export default function ComposePage() {
 
               // Apply frame after AI overlay
               if (selectedFrame.src) {
-                const frameImg = new Image();
+                const frameImg = document.createElement("img");
                 frameImg.onload = () => {
                   ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
                 };
@@ -768,7 +897,7 @@ export default function ComposePage() {
             aiImg.src = aiGeneratedImage;
           } else if (selectedFrame.src) {
             // Apply frame directly if no AI
-            const frameImg = new Image();
+            const frameImg = document.createElement("img");
             frameImg.onload = () => {
               ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
             };
@@ -791,7 +920,13 @@ export default function ComposePage() {
     const actualPhotoCount = Math.min(photos.length, shots);
 
     // Define layout configurations
-    const layoutConfigs: Record<string, any> = {
+    type PhotoSlot = { x: number; y: number; width: number; height: number };
+    type LayoutConfig = {
+      canvasWidth: number;
+      canvasHeight: number;
+      photoSlots: PhotoSlot[];
+    };
+    const layoutConfigs: Record<string, LayoutConfig> = {
       "double-vertical": {
         canvasWidth: 400,
         canvasHeight: 600,
@@ -858,7 +993,7 @@ export default function ComposePage() {
       const slot = config.photoSlots[i];
 
       if (photo && slot) {
-        const img = new Image();
+        const img = document.createElement("img");
         img.crossOrigin = "anonymous";
         img.onload = () => {
           ctx.drawImage(img, slot.x, slot.y, slot.width, slot.height);
@@ -868,7 +1003,7 @@ export default function ComposePage() {
           if (loadedCount === totalToLoad) {
             // Apply AI generated image as overlay if available
             if (aiGeneratedImage) {
-              const aiImg = new Image();
+              const aiImg = document.createElement("img");
               aiImg.crossOrigin = "anonymous";
               aiImg.onload = () => {
                 // Draw AI image over the entire canvas as styled version
@@ -876,7 +1011,7 @@ export default function ComposePage() {
 
                 // Apply frame after AI overlay
                 if (selectedFrame.src) {
-                  const frameImg = new Image();
+                  const frameImg = document.createElement("img");
                   frameImg.onload = () => {
                     ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
                   };
@@ -886,7 +1021,7 @@ export default function ComposePage() {
               aiImg.src = aiGeneratedImage;
             } else if (selectedFrame.src) {
               // Apply frame directly if no AI
-              const frameImg = new Image();
+              const frameImg = document.createElement("img");
               frameImg.onload = () => {
                 ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
               };
@@ -919,7 +1054,7 @@ export default function ComposePage() {
 
   // === Handle frame change to prevent stacking ===
   const handleFrameChange = (frame: Frame) => {
-    console.log("🎨 Frame change requested:", {
+    console.log("Frame change requested:", {
       from: selectedFrame.name,
       to: frame.name,
       hasAI: !!aiGeneratedImage,
@@ -941,11 +1076,11 @@ export default function ComposePage() {
 
     setSelectedFrame(frame);
 
-    // Allow render to complete before accepting new changes
+    // Allow render to complete before accepting new changes - increased timeout
     renderTimeoutRef.current = setTimeout(() => {
       setIsRendering(false);
-      console.log("✅ Frame change complete, ready for next change");
-    }, 100);
+      console.log("Frame change complete, ready for next change");
+    }, 300); // Increased from 100ms to 300ms
 
     // DON'T reset photos - this causes duplication
     // The canvas render function will handle frame overlay properly
@@ -1250,186 +1385,215 @@ export default function ComposePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-coral-50 via-cream-50 to-sage-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
       {/* Header */}
-      <div className="bg-gradient-to-r from-coral-600 via-coral-500 to-sage-500 shadow-xl">
-        <div className="container mx-auto px-6 py-6">
+      <div className="bg-white border-b border-slate-200 shadow-sm">
+        <div className="container mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-black text-white tracking-wide">
-              🎨 COMPOSE EDITOR
-            </h1>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Palette className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+                  Photo Editor
+                </h1>
+                <p className="text-sm text-slate-600">Customize your photos</p>
+              </div>
+            </div>
             <button
               onClick={() => router.push("/booth")}
-              className="bg-white/20 hover:bg-white/30 text-white px-6 py-2 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-xl transform hover:scale-105 border-2 border-white/30 backdrop-blur-sm"
+              className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 rounded-xl font-medium text-sm transition-all duration-200 border border-slate-200 hover:border-slate-300"
             >
-              ← Back to Booth
+              <ArrowLeft className="w-4 h-4" />
+              Back to Booth
             </button>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto px-6 py-8 max-w-7xl">
         {!selectedPhoto ? (
-          <div className="text-center py-16">
-            <div className="text-8xl mb-6">📷</div>
-            <h2 className="text-2xl font-bold text-charcoal-800 mb-4">
+          <div className="text-center py-20">
+            <div className="w-24 h-24 bg-gradient-to-br from-slate-100 to-slate-200 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+              <Camera className="w-12 h-12 text-slate-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-slate-900 mb-3">
               No Photo Selected
             </h2>
-            <p className="text-charcoal-600 mb-8">
-              Please take a photo first at the booth
+            <p className="text-slate-600 mb-8 max-w-md mx-auto leading-relaxed">
+              Take a photo first at the booth to start editing and customizing
+              your images
             </p>
             <button
               onClick={() => router.push("/booth")}
-              className="bg-gradient-to-r from-coral-500 to-coral-600 hover:from-coral-600 hover:to-coral-700 text-white px-8 py-4 rounded-full font-bold text-lg transition-all shadow-lg hover:shadow-xl transform hover:scale-105 border-2 border-coral-400"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-8 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
             >
-              📸 Go to Photo Booth
+              <Camera className="w-5 h-5" />
+              Go to Photo Booth
             </button>
           </div>
         ) : (
-          <div className="grid lg:grid-cols-2 gap-8">
+          <div className="grid xl:grid-cols-5 lg:grid-cols-3 gap-8">
             {/* Left Panel - Canvas */}
-            <div className="bg-white rounded-2xl shadow-xl p-6 border border-sage-200/50">
-              <h2 className="text-xl font-bold text-charcoal-800 mb-4 flex items-center gap-2">
-                <span className="text-2xl">🖼️</span>
-                Preview
-              </h2>
-
-              <div className="flex justify-center mb-6">
-                <div className="bg-gradient-to-br from-charcoal-100 to-charcoal-200 p-4 rounded-xl shadow-inner">
-                  <canvas
-                    ref={canvasRef}
-                    className="border-2 border-charcoal-300 rounded-lg shadow-lg"
-                    style={{ maxWidth: "100%", height: "auto" }}
-                  />
+            <div className="xl:col-span-3 lg:col-span-2">
+              <div className="bg-white rounded-3xl shadow-lg border border-slate-200 p-8">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                      <ImageIcon className="w-4 h-4 text-white" />
+                    </div>
+                    <h2 className="text-xl font-bold text-slate-900">
+                      Preview
+                    </h2>
+                  </div>
                 </div>
-              </div>
 
-              {selectedPhoto && (
-                <div className="space-y-6">
-                  {/* Main Action Buttons */}
-                  <div className="flex flex-wrap gap-3 justify-center">
-                    <button
-                      onClick={handleDownload}
-                      className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-8 py-3 rounded-full font-bold text-lg transition-all shadow-lg hover:shadow-xl transform hover:scale-105 border-2 border-blue-400 flex items-center gap-2"
-                    >
-                      <span className="text-xl">💾</span>
-                      Download
-                    </button>
+                <div className="flex justify-center mb-8">
+                  <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-6 rounded-2xl shadow-inner border border-slate-200">
+                    <canvas
+                      ref={canvasRef}
+                      className="border border-slate-300 rounded-xl shadow-lg bg-white"
+                      style={{ maxWidth: "100%", height: "auto" }}
+                    />
+                  </div>
+                </div>
 
-                    <button
-                      onClick={saveToCloudinary}
-                      disabled={uploading}
-                      className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-8 py-3 rounded-full font-bold text-lg transition-all shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 border-2 border-purple-400 flex items-center gap-2"
-                    >
-                      <span className="text-xl">☁️</span>
-                      {uploading ? "Saving..." : "Save to Cloud"}
-                    </button>
-
-                    <button
-                      onClick={shareToWhatsApp}
-                      disabled={uploading}
-                      className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-8 py-3 rounded-full font-bold text-lg transition-all shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 border-2 border-green-400 flex items-center gap-2"
-                    >
-                      <span className="text-xl">📱</span>
-                      {uploading ? "Sending..." : "Share WhatsApp"}
-                    </button>
-
-                    {/* Remove Frame/AI Button */}
-                    {(selectedFrame.id !== "none" || aiGeneratedImage) && (
+                {selectedPhoto && (
+                  <div className="space-y-6">
+                    {/* Main Action Buttons */}
+                    <div className="flex flex-wrap gap-3 justify-center">
                       <button
-                        onClick={handleRemoveFrame}
-                        className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-3 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-xl transform hover:scale-105 border-2 border-red-400 flex items-center gap-2"
+                        onClick={handleDownload}
+                        className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-8 py-3 rounded-full font-bold text-lg transition-all shadow-lg hover:shadow-xl transform hover:scale-105 border-2 border-blue-400 flex items-center gap-2"
                       >
-                        <span className="text-lg">🗑️</span>
-                        {aiGeneratedImage
-                          ? "Remove AI & Frame"
-                          : "Remove Frame"}
+                        <Download className="w-5 h-5" />
+                        Download
                       </button>
+
+                      <button
+                        onClick={saveToCloudinary}
+                        disabled={uploading}
+                        className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-8 py-3 rounded-full font-bold text-lg transition-all shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 border-2 border-purple-400 flex items-center gap-2"
+                      >
+                        <CloudUpload className="w-5 h-5" />
+                        {uploading ? "Saving..." : "Save to Cloud"}
+                      </button>
+
+                      <button
+                        onClick={shareToWhatsApp}
+                        disabled={uploading}
+                        className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-8 py-3 rounded-full font-bold text-lg transition-all shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 border-2 border-green-400 flex items-center gap-2"
+                      >
+                        <MessageCircle className="w-5 h-5" />
+                        {uploading ? "Sending..." : "Share WhatsApp"}
+                      </button>
+
+                      {/* Remove Frame/AI Button */}
+                      {(selectedFrame.id !== "none" || aiGeneratedImage) && (
+                        <button
+                          onClick={handleRemoveFrame}
+                          className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-3 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-xl transform hover:scale-105 border-2 border-red-400 flex items-center gap-2"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          {aiGeneratedImage
+                            ? "Remove AI & Frame"
+                            : "Remove Frame"}
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Message Alert */}
+                    {message && (
+                      <div className="bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-300 rounded-2xl p-4 shadow-lg">
+                        <div className="flex items-center gap-3">
+                          <div className="w-4 h-4 bg-blue-500 rounded-full animate-pulse shadow-lg"></div>
+                          <p className="text-sm font-bold text-blue-800">
+                            {message}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* QR Code Section */}
+                    {uploadedPhotoUrl && (
+                      <div className="bg-gradient-to-br from-white to-cream-50 rounded-2xl shadow-xl border-4 border-coral-200 text-center p-6">
+                        <h3 className="text-lg font-bold mb-4 text-charcoal-800 tracking-wide flex items-center justify-center gap-2">
+                          <ExternalLink className="w-5 h-5" />
+                          QUICK ACCESS
+                        </h3>
+                        <div className="inline-block bg-white p-4 rounded-xl shadow-lg border-2 border-coral-200 mb-4">
+                          <QRCodeCanvas
+                            value={uploadedPhotoUrl}
+                            size={150}
+                            level="M"
+                          />
+                        </div>
+                        <div>
+                          <a
+                            href={uploadedPhotoUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="bg-gradient-to-r from-coral-500 to-coral-600 hover:from-coral-600 hover:to-coral-700 text-white px-6 py-3 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-xl transform hover:scale-105 inline-block border-2 border-coral-400"
+                          >
+                            🔗 Open Photo
+                          </a>
+                        </div>
+                      </div>
                     )}
                   </div>
-
-                  {/* Message Alert */}
-                  {message && (
-                    <div className="bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-300 rounded-2xl p-4 shadow-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="w-4 h-4 bg-blue-500 rounded-full animate-pulse shadow-lg"></div>
-                        <p className="text-sm font-bold text-blue-800">
-                          {message}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* QR Code Section */}
-                  {uploadedPhotoUrl && (
-                    <div className="bg-gradient-to-br from-white to-cream-50 rounded-2xl shadow-xl border-4 border-coral-200 text-center p-6">
-                      <h3 className="text-lg font-bold mb-4 text-charcoal-800 tracking-wide">
-                        📱 QUICK ACCESS
-                      </h3>
-                      <div className="inline-block bg-white p-4 rounded-xl shadow-lg border-2 border-coral-200 mb-4">
-                        <QRCodeCanvas
-                          value={uploadedPhotoUrl}
-                          size={150}
-                          level="M"
-                        />
-                      </div>
-                      <div>
-                        <a
-                          href={uploadedPhotoUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="bg-gradient-to-r from-coral-500 to-coral-600 hover:from-coral-600 hover:to-coral-700 text-white px-6 py-3 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-xl transform hover:scale-105 inline-block border-2 border-coral-400"
-                        >
-                          🔗 Open Photo
-                        </a>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             {/* Right Panel - Controls */}
-            <div className="space-y-6">
+            <div className="xl:col-span-2 lg:col-span-1 space-y-6">
               {/* Frame / Sticker / AI Selection */}
-              <div className="bg-white rounded-2xl shadow-xl p-6 border border-sage-200/50">
-                <h3 className="text-lg font-bold text-charcoal-800 mb-4 flex items-center gap-2">
-                  <span className="text-xl">🎨</span>
-                  Frames, Stickers & AI
-                </h3>
+              <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
+                    <Filter className="w-4 h-4 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900">
+                    Customization
+                  </h3>
+                </div>
 
                 {/* Category Tabs */}
-                <div className="flex gap-2 mb-4">
+                <div className="flex gap-2 mb-6">
                   <button
                     onClick={() => setActiveCategory("frame")}
-                    className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                    className={`px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 ${
                       activeCategory === "frame"
-                        ? "bg-gradient-to-r from-sage-500 to-sage-600 text-white shadow-lg"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg border border-purple-300"
+                        : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200"
                     }`}
                   >
-                    🖼️ Frames
+                    <ImageIcon className="w-4 h-4 mr-2" />
+                    Frames
                   </button>
-                  <button
+                  {/* <button
                     onClick={() => setActiveCategory("sticker")}
-                    className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                    className={`px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 ${
                       activeCategory === "sticker"
-                        ? "bg-gradient-to-r from-sage-500 to-sage-600 text-white shadow-lg"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg border border-purple-300"
+                        : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200"
                     }`}
                   >
-                    ✨ Stickers
-                  </button>
+                    <span className="text-base mr-2">✨</span>
+                    Stickers
+                  </button> */}
                   <button
                     onClick={() => setActiveCategory("ai")}
-                    className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                    className={`px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 ${
                       activeCategory === "ai"
-                        ? "bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-lg"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg border border-purple-300"
+                        : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200"
                     }`}
                   >
-                    🤖 AI Styles
+                    <Bot className="w-4 h-4 mr-2" />
+                    AI Style
                   </button>
                 </div>
 
@@ -1441,31 +1605,31 @@ export default function ComposePage() {
                         Select AI Style
                       </label>
                       <p>Token : {currentUser?.tokens}</p>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 gap-2">
                         {aiList.map((ai) => (
                           <button
                             key={String(ai._id)}
                             onClick={() => setAiPrompt(ai.prompt)}
-                            className={`p-3 rounded-full border-2 transition-all transform hover:scale-105 font-medium flex items-center gap-2 ${
+                            className={`p-2 rounded-lg border transition-all hover:scale-105 text-xs flex items-center gap-2 ${
                               aiPrompt === ai.prompt
-                                ? "bg-gradient-to-r from-indigo-500 to-indigo-600 text-white border-indigo-400 shadow-lg"
-                                : "bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border-gray-300 hover:from-gray-200 hover:to-gray-300 shadow-md hover:shadow-lg"
+                                ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white border-purple-400 shadow-md"
+                                : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 shadow-sm"
                             }`}
                           >
-                            <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
-                              <img
+                            <div className="w-4 h-4 rounded-full overflow-hidden flex-shrink-0">
+                              <Image
                                 src={ai.icon}
                                 alt={ai.name}
                                 className="w-full h-full object-cover"
-                                width={24}
-                                height={24}
+                                width={16}
+                                height={16}
                               />
                             </div>
-                            <span className="flex-1 text-left text-sm">
+                            <span className="flex-1 text-left truncate">
                               {ai.name}
                             </span>
                             {aiPrompt === ai.prompt && (
-                              <span className="text-sm">✓</span>
+                              <span className="text-xs">✓</span>
                             )}
                           </button>
                         ))}
@@ -1480,9 +1644,9 @@ export default function ComposePage() {
                     {selectedFrame.id !== "none" && (
                       <div className="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-3">
                         <div className="flex items-center gap-2">
-                          <span className="text-yellow-600">⚠️</span>
+                          <AlertTriangle className="w-4 h-4 text-yellow-600" />
                           <p className="text-sm text-yellow-800 font-medium">
-                            Pilih "No Frame" terlebih dahulu sebelum generate AI
+                            Pilih No Frame terlebih dahulu sebelum generate AI
                             untuk mencegah duplikasi frame.
                           </p>
                         </div>
@@ -1508,13 +1672,13 @@ export default function ComposePage() {
                     </button>
 
                     <p className="text-xs text-gray-500">
-                      * Hasil AI akan menggantikan foto saat ini dan tetap bisa
-                      diberi frame/sticker lagi. Pastikan pilih "No Frame"
+                      Hasil AI akan menggantikan foto saat ini dan tetap bisa
+                      diberi frame/sticker lagi. Pastikan pilih No Frame
                       terlebih dahulu untuk hasil terbaik.
                     </p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 gap-3">
+                  <div className="grid grid-cols-2 gap-2">
                     {availableFrames
                       .filter(
                         (frame) =>
@@ -1525,22 +1689,27 @@ export default function ComposePage() {
                         <button
                           key={frame.id}
                           onClick={() => handleFrameChange(frame)}
-                          className={`p-4 rounded-xl border-2 transition-all transform hover:scale-105 font-medium ${
+                          className={`p-2 rounded-lg border transition-all hover:scale-105 text-xs ${
                             selectedFrame.id === frame.id
-                              ? "bg-gradient-to-r from-sage-500 to-sage-600 text-white border-sage-400 shadow-lg"
-                              : "bg-gradient-to-r from-charcoal-100 to-charcoal-200 text-charcoal-700 border-charcoal-300 hover:from-charcoal-200 hover:to-charcoal-300 shadow-md hover:shadow-lg"
+                              ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white border-purple-400 shadow-md"
+                              : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 shadow-sm"
                           }`}
                         >
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 bg-white/20 rounded flex items-center justify-center flex-shrink-0">
                               {frame.type === "strip" ? (
-                                <div className="flex flex-col gap-1">
-                                  {Array(frame.stripConfig?.photoCount || 2)
+                                <div className="flex flex-col gap-0.5">
+                                  {Array(
+                                    Math.min(
+                                      frame.stripConfig?.photoCount || 2,
+                                      3
+                                    )
+                                  )
                                     .fill(0)
                                     .map((_, i) => (
                                       <div
                                         key={i}
-                                        className="w-2 h-1 bg-current rounded"
+                                        className="w-1.5 h-0.5 bg-current rounded"
                                       ></div>
                                     ))}
                                 </div>
@@ -1549,22 +1718,24 @@ export default function ComposePage() {
                                 <img
                                   src={frame.src}
                                   alt={frame.name}
-                                  className="w-8 h-8 object-cover rounded"
+                                  className="w-4 h-4 object-cover rounded"
                                 />
                               ) : (
-                                <span className="text-lg">🚫</span>
+                                <X className="w-4 h-4 text-gray-400" />
                               )}
                             </div>
-                            <span className="flex-1 text-left">
-                              {frame.name}
-                              {frame.type === "strip" && (
-                                <span className="block text-xs opacity-70">
-                                  {frame.stripConfig?.photoCount} photos strip
-                                </span>
-                              )}
-                            </span>
+                            <div className="flex-1 min-w-0">
+                              <div className="text-left truncate">
+                                {frame.name}
+                                {frame.type === "strip" && (
+                                  <span className="block text-xs opacity-70">
+                                    {frame.stripConfig?.photoCount} photos strip
+                                  </span>
+                                )}
+                              </div>
+                            </div>
                             {selectedFrame.id === frame.id && (
-                              <span className="text-lg">✓</span>
+                              <Check className="w-4 h-4 text-green-500" />
                             )}
                           </div>
                         </button>

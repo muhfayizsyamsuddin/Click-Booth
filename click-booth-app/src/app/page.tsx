@@ -113,7 +113,7 @@ export default function Home() {
 
             <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/booth"
+                href="/layout-selection"
                 className="group inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r from-red-600 to-red-500 text-white font-semibold shadow-lg shadow-red-500/25 hover:shadow-xl hover:shadow-red-500/40 transition-all duration-300 hover:-translate-y-0.5"
               >
                 <Camera className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" />
