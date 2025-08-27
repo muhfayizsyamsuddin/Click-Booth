@@ -37,6 +37,7 @@ import {
   Flame,
   Clock,
   CheckCircle,
+  Gem,
   //   TrendingUp,
 } from "lucide-react";
 import {
@@ -51,6 +52,7 @@ interface UserProfile {
   username: string;
   email: string;
   createdAt: string;
+  tokens?: number; // Tambah field token
 }
 
 interface Photo {
@@ -71,6 +73,37 @@ export default function ProfilePage() {
   const [editName, setEditName] = useState("");
   const [hasMore, setHasMore] = useState(true);
   const [photosLoading, setPhotosLoading] = useState(false);
+
+  // Function to refresh user data (especially token balance)
+  const refreshUserData = useCallback(async () => {
+    try {
+      const token = getAuthTokenFromCookies();
+      if (!token) return;
+
+      const response = await fetch("/api/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        const profileData = await response.json();
+        if (profileData.authenticated) {
+          setUser((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  tokens: profileData.tokens || 0,
+                }
+              : null
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Failed to refresh user data:", error);
+    }
+  }, []);
 
   const loadPhotos = useCallback(
     async (next = false) => {
@@ -144,6 +177,29 @@ export default function ProfilePage() {
     initializeData();
   }, [loadPhotos]);
 
+  // Refresh user data when page becomes visible (user returns from payment)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && user) {
+        refreshUserData();
+      }
+    };
+
+    const handleFocus = () => {
+      if (user) {
+        refreshUserData();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [user, refreshUserData]);
+
   const loadProfile = async () => {
     try {
       setLoading(true);
@@ -189,6 +245,7 @@ export default function ProfilePage() {
         username: profileData.username,
         email: profileData.email,
         createdAt: profileData.createdAt,
+        tokens: profileData.tokens || 0, // Tambah token dari response
       };
 
       setUser(userProfile);
@@ -370,7 +427,7 @@ export default function ProfilePage() {
                 }}
                 className="text-center mb-8"
               >
-                <div className="w-32 h-32 bg-gradient-to-br from-amber-400 to-red-500 rounded-full mx-auto mb-6 flex items-center justify-center shadow-2xl">
+                <div className="w-32 h-32 bg-slate-600 rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg">
                   <User className="w-16 h-16 text-white" />
                 </div>
 
@@ -443,6 +500,30 @@ export default function ProfilePage() {
                       {user?.email || "Not available"}
                     </p>
                   </div>
+                </div>
+
+                {/* Token Balance */}
+                <div className="flex items-center space-x-4 p-4 bg-amber-50 rounded-2xl border border-amber-200">
+                  <Gem className="w-6 h-6 text-red-500" />
+                  <div className="flex-1">
+                    <p className="text-sm text-slate-500 font-medium">
+                      Token Balance
+                    </p>
+                    <div className="flex items-center space-x-2">
+                      <p className="text-2xl font-bold text-slate-800">
+                        {user?.tokens ?? 0}
+                      </p>
+                      <span className="text-sm text-slate-500">tokens</span>
+                    </div>
+                  </div>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => (window.location.href = "/payment")}
+                    className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl font-semibold text-sm shadow-md hover:shadow-lg transition-all duration-200"
+                  >
+                    Buy More
+                  </motion.button>
                 </div>
 
                 <div className="flex items-center space-x-4 p-4 bg-amber-50 rounded-2xl">
