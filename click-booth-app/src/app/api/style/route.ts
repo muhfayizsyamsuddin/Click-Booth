@@ -40,8 +40,47 @@ export async function POST(req: Request) {
 
     const form = await req.formData();
     const image = form.get("image") as File | null;
+    let imageWidth: number | undefined;
+    let imageHeight: number | undefined;
+
+    if (image) {
+      const arrayBuffer = await image.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      // Read image dimensions from buffer
+      // Check for PNG signature
+      if (
+        buffer.length >= 24 &&
+        buffer.toString("hex", 0, 8) === "89504e470d0a1a0a"
+      ) {
+        // PNG format - IHDR chunk starts at byte 12
+        imageWidth = buffer.readUInt32BE(16);
+        imageHeight = buffer.readUInt32BE(20);
+      }
+      // Check for JPEG signature
+      else if (buffer.length >= 2 && buffer[0] === 0xff && buffer[1] === 0xd8) {
+        // JPEG format - need to parse segments
+        let offset = 2;
+        while (offset < buffer.length - 4) {
+          if (buffer[offset] === 0xff) {
+            const marker = buffer[offset + 1];
+            if (marker === 0xc0 || marker === 0xc2) {
+              // SOF0 or SOF2
+              imageHeight = buffer.readUInt16BE(offset + 5);
+              imageWidth = buffer.readUInt16BE(offset + 7);
+              break;
+            }
+            const segmentLength = buffer.readUInt16BE(offset + 2);
+            offset += 2 + segmentLength;
+          } else {
+            offset++;
+          }
+        }
+      }
+    }
+    console.log(imageWidth, imageHeight);
     const prompt = form.get("prompt") as string;
-    const size = parseSize(form.get("size")); // ✅ sudah dinarrow ke union ---
+    const size = `${imageWidth}x${imageHeight}`; // ✅ sudah dinarrow ke union ---
     const mask = form.get("mask") as File | null;
 
     if (!image) return new Response("No image uploaded", { status: 400 });
@@ -51,8 +90,8 @@ export async function POST(req: Request) {
       model: "gpt-image-1",
       image,
       ...(mask ? { mask } : {}),
-      prompt,
-      size,
+      prompt: `${prompt}. Please do not change the original image size. The original image width is ${imageWidth}px and height is ${imageHeight}px.`,
+      size: "auto",
     });
 
     const item = res.data?.[0];
