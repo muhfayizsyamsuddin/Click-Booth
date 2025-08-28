@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { CheckCircle, XCircle, Clock, Loader2 } from "lucide-react";
+import { dispatchTokenUpdate } from "@/helpers/tokenUpdateHelper";
 
 type VerifyResult = {
   ok: boolean;
@@ -46,6 +47,8 @@ export default function PaymentFinishPage() {
           if (s.status === "success") {
             setState("success");
             setMsg("Payment verified. Tokens added to your account.");
+            // Dispatch token update to refresh navbar
+            dispatchTokenUpdate();
             // Refresh navbar badge/token setelah 1.5s lalu arahkan
             setTimeout(() => router.replace("/profile"), 2500);
             return;
@@ -77,6 +80,8 @@ export default function PaymentFinishPage() {
         if (notify.ok) {
           setState("success");
           setMsg("Payment processed. Tokens added to your account.");
+          // Dispatch token update to refresh navbar
+          dispatchTokenUpdate();
           setTimeout(() => router.replace("/profile"), 1500);
         } else {
           setState("pending");

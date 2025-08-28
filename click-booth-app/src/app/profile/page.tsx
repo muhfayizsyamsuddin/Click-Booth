@@ -21,6 +21,7 @@ import {
   AlertTriangle,
   RefreshCw,
   ExternalLink,
+  Loader2,
   // Icon tambahan untuk photo booth
   //   Heart,
   Star,
@@ -44,6 +45,10 @@ import {
   getUserFromCookiesClient,
   getAuthTokenFromCookies,
 } from "@/helpers/getUserFromCookiesClient";
+import {
+  dispatchTokenUpdate,
+  dispatchAuthUpdate,
+} from "@/helpers/tokenUpdateHelper";
 // import Footer from "@/components/Footer";
 
 interface UserProfile {
@@ -98,6 +103,9 @@ export default function ProfilePage() {
                 }
               : null
           );
+
+          // Dispatch token update to refresh navbar
+          dispatchTokenUpdate(profileData.tokens || 0);
         }
       }
     } catch (error) {
@@ -284,6 +292,9 @@ export default function ProfilePage() {
   };
 
   const handleLogout = () => {
+    // Dispatch logout event to notify navbar
+    dispatchAuthUpdate("logout");
+
     // Clear the cookie properly
     document.cookie =
       "authorization=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; sameSite=lax;";
@@ -417,10 +428,10 @@ export default function ProfilePage() {
           >
             <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border border-amber-200/50 p-8 sticky top-8">
               {/* Profile Avatar */}
-              <h1 className="flex items-center gap-2 text-4xl font-bold text-slate-800 mb-2">
+              {/* <h1 className="flex items-center gap-2 text-4xl font-bold text-slate-800 mb-2">
                 <User className="w-8 h-8 text-slate-700" />
                 My Profile
-              </h1>
+              </h1> */}
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
@@ -714,7 +725,55 @@ export default function ProfilePage() {
               </div>
 
               {/* Photos Display */}
-              {photos.length === 0 ? (
+              {photosLoading && photos.length === 0 ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.6 }}
+                  className="space-y-6"
+                >
+                  {/* Loading Skeleton for Photos */}
+                  <div className="text-center py-8">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{
+                        duration: 1,
+                        repeat: Infinity,
+                        ease: "linear",
+                      }}
+                      className="w-12 h-12 mx-auto mb-4"
+                    >
+                      <Loader2 className="w-12 h-12 text-amber-600" />
+                    </motion.div>
+                    <h4 className="text-lg font-semibold text-slate-800 mb-2">
+                      Loading Photos...
+                    </h4>
+                    <p className="text-slate-600">
+                      Please wait while we fetch your photo history
+                    </p>
+                  </div>
+
+                  {/* Skeleton Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[...Array(6)].map((_, index) => (
+                      <div
+                        key={index}
+                        className="bg-white rounded-2xl shadow-lg border border-amber-200/50 overflow-hidden"
+                      >
+                        <div className="aspect-square bg-gradient-to-br from-gray-200 to-gray-300 animate-pulse" />
+                        <div className="p-4 space-y-3">
+                          <div className="h-4 bg-gray-200 rounded animate-pulse" />
+                          <div className="flex gap-2">
+                            <div className="h-8 w-16 bg-gray-200 rounded animate-pulse" />
+                            <div className="h-8 w-16 bg-gray-200 rounded animate-pulse" />
+                            <div className="h-8 w-16 bg-gray-200 rounded animate-pulse" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              ) : photos.length === 0 ? (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
