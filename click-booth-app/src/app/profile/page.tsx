@@ -355,7 +355,7 @@ export default function ProfilePage() {
       className="min-h-screen bg-amber-50"
     >
       {/* Header */}
-      <motion.div
+      {/* <motion.div
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.1 }}
@@ -376,10 +376,10 @@ export default function ProfilePage() {
             </p>
           </motion.div>
         </div>
-      </motion.div>
+      </motion.div> */}
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-6 py-16">
         {error && (
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
@@ -408,6 +408,7 @@ export default function ProfilePage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Profile Card */}
+
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -416,6 +417,10 @@ export default function ProfilePage() {
           >
             <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border border-amber-200/50 p-8 sticky top-8">
               {/* Profile Avatar */}
+              <h1 className="flex items-center gap-2 text-4xl font-bold text-slate-800 mb-2">
+                <User className="w-8 h-8 text-slate-700" />
+                My Profile
+              </h1>
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}

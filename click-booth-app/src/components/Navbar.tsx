@@ -106,18 +106,18 @@ export default function Navbar() {
           >
             <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
               <Image
-                src="/clickBooth.png"
+                src="/logonobg.png"
                 alt="ClickBooth Logo"
                 width={50}
                 height={50}
                 className="object-contain"
               />
             </div>
-            <div className="text-base text-slate-800 px-2 py-1 font-bold">
+            {/* <div className="text-base text-slate-800 px-2 py-1 font-bold">
               <span className="font-bold text-slate-800">
                 Click<span className="text-red-500">Booth</span>
               </span>
-            </div>
+            </div> */}
             {/* <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full font-medium">
               PROFESSIONAL STUDIO
             </span> */}
