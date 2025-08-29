@@ -13,14 +13,14 @@ import {
   BookOpen,
   ChevronDown,
   Loader2,
-  AlertCircle,
+  AlertCircle
 } from "lucide-react";
 
 const AVAILABLE_FILTERS: { id: string; label: string; css: string }[] = [
   { id: "none", label: "None", css: "none" },
   { id: "grayscale", label: "Grayscale", css: "grayscale(100%)" },
   { id: "sepia", label: "Sepia", css: "sepia(80%)" },
-  { id: "bright", label: "Bright", css: "brightness(1.12)" },
+  { id: "bright", label: "Bright", css: "brightness(1.12)" }
 ];
 
 const LAYOUTS = [
@@ -29,7 +29,7 @@ const LAYOUTS = [
   { id: "double-horizontal", label: "Double Horizontal", cols: 2, poses: 2 },
   { id: "triple-vertical", label: "Creative Collage", cols: 1, poses: 3 },
   { id: "quad-vertical", label: "Quad Vertical", cols: 1, poses: 4 },
-  { id: "quad-horizontal", label: "Quad Horizontal", cols: 2, poses: 4 },
+  { id: "quad-horizontal", label: "Quad Horizontal", cols: 2, poses: 4 }
 ];
 
 export default function BoothPage() {
@@ -101,7 +101,7 @@ export default function BoothPage() {
       console.log("Layout loaded:", {
         layoutId: layoutData.id,
         savedShots: layoutData.shots,
-        finalShotsCount: correctShotsCount,
+        finalShotsCount: correctShotsCount
       });
     } catch (e) {
       console.warn("Failed to load saved layout:", e);
@@ -114,7 +114,7 @@ export default function BoothPage() {
       try {
         await fetch("/api/me", {
           method: "GET",
-          credentials: "include",
+          credentials: "include"
         });
         if (!mounted) return;
         // Just continue without setting state
@@ -137,10 +137,7 @@ export default function BoothPage() {
     setCameraError(null);
     try {
       if (streamRef.current) {
-        if (
-          videoRef.current &&
-          videoRef.current.srcObject !== streamRef.current
-        ) {
+        if (videoRef.current && videoRef.current.srcObject !== streamRef.current) {
           videoRef.current.srcObject = streamRef.current;
         }
         try {
@@ -156,8 +153,8 @@ export default function BoothPage() {
           facingMode: "user",
           width: { ideal: 1280 },
           height: { ideal: 720 },
-          frameRate: { ideal: 30 },
-        },
+          frameRate: { ideal: 30 }
+        }
       });
       streamRef.current = s;
       if (videoRef.current) {
@@ -209,7 +206,8 @@ export default function BoothPage() {
         e.code === "Space" &&
         !runningCountdown &&
         !finalComposed &&
-        !previewCaptured
+        !previewCaptured &&
+        !isCapturing
       ) {
         e.preventDefault();
         startCountdown();
@@ -228,11 +226,7 @@ export default function BoothPage() {
       // Enter to proceed
       if (e.code === "Enter") {
         e.preventDefault();
-        if (
-          previewCaptured &&
-          !finalComposed &&
-          capturedDataUrls.length >= shotsCount
-        ) {
+        if (previewCaptured && !finalComposed && capturedDataUrls.length >= shotsCount) {
           composeFinal().catch((e) => console.warn(e));
         } else if (finalComposed) {
           goToEditPhotos();
@@ -243,16 +237,10 @@ export default function BoothPage() {
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    runningCountdown,
-    finalComposed,
-    previewCaptured,
-    capturedDataUrls.length,
-    shotsCount,
-  ]);
+  }, [runningCountdown, finalComposed, previewCaptured, capturedDataUrls.length, shotsCount]);
 
   function startCountdown() {
-    if (runningCountdown) return;
+    if (runningCountdown || isCapturing || finalComposed) return;
     setCountdown(3);
     setRunningCountdown(true);
     timerRef.current = window.setInterval(() => {
@@ -301,8 +289,7 @@ export default function BoothPage() {
     off.height = h;
     const ctx = off.getContext("2d");
     if (!ctx) return null;
-    const filterCss =
-      AVAILABLE_FILTERS.find((f) => f.id === selectedFilter)?.css ?? "none";
+    const filterCss = AVAILABLE_FILTERS.find((f) => f.id === selectedFilter)?.css ?? "none";
     (ctx as CanvasRenderingContext2D).filter = filterCss;
     ctx.drawImage(vid, 0, 0, w, h);
     return off.toDataURL("image/jpeg", 0.92);
@@ -327,7 +314,7 @@ export default function BoothPage() {
           break;
         }
         console.warn("Duplicate photo detected, retrying...", tries + 1);
-        await new Promise((r) => setTimeout(r, 300)); // Increased delay
+        await new Promise((r) => setTimeout(r, 300));
         await ensureFreshFrame();
         dataUrl = await captureOnceFromVideo();
         if (!dataUrl) return;
@@ -335,42 +322,44 @@ export default function BoothPage() {
       }
 
       if (tries >= 4) {
-        console.warn(
-          "Could not get unique photo after 4 tries, using current capture"
-        );
+        console.warn("Could not get unique photo after 4 tries, using current capture");
       }
 
-      // append safely and trigger compose using the NEXT array (avoid reading stale state)
-      setCapturedDataUrls((prev) => {
-        const last = prev[prev.length - 1] ?? null;
-        if (last === dataUrl) {
-          console.warn("Skipping duplicate photo capture");
-          return prev;
-        }
-        const next = [...prev, dataUrl];
+      // Check again for duplicate to prevent race conditions
+      const currentCaptured = capturedDataUrls;
+      const lastPhoto = currentCaptured[currentCaptured.length - 1] ?? null;
+      if (lastPhoto === dataUrl) {
+        console.warn("Skipping duplicate photo capture - race condition detected");
+        return;
+      }
 
-        console.log("Photo captured:", {
-          photoNumber: next.length,
-          totalExpected: shotsCount,
-          photoPreview: dataUrl.substring(0, 50) + "...",
-          isUnique: !prev.includes(dataUrl),
-          willTriggerCompose: next.length >= shotsCount,
-        });
+      // Update captured photos state
+      const newCapturedPhotos = [...currentCaptured, dataUrl];
+      setCapturedDataUrls(newCapturedPhotos);
 
-        // schedule side-effect with the concrete `next` array so composeFinal sees correct images
-        setTimeout(() => {
-          if (next.length >= shotsCount) {
-            composeFinal(next).catch((e) => console.warn(e));
-          } else {
-            startCamera();
-          }
-        }, 250);
-
-        return next;
+      console.log("Photo captured:", {
+        photoNumber: newCapturedPhotos.length,
+        totalExpected: shotsCount,
+        photoPreview: dataUrl.substring(0, 50) + "...",
+        isUnique: !currentCaptured.includes(dataUrl),
+        willTriggerCompose: newCapturedPhotos.length >= shotsCount
       });
 
       setPreviewCaptured(dataUrl);
       setFinalComposed(false);
+
+      // Handle next action based on photo count
+      if (newCapturedPhotos.length >= shotsCount) {
+        // All photos taken, compose final image
+        setTimeout(() => {
+          composeFinal(newCapturedPhotos).catch((e) => console.warn(e));
+        }, 1000);
+      } else {
+        // More photos needed, restart camera after delay
+        setTimeout(() => {
+          startCamera();
+        }, 1000);
+      }
     } finally {
       setIsCapturing(false);
     }
@@ -380,12 +369,18 @@ export default function BoothPage() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    // Prevent multiple calls to composeFinal
+    if (finalComposed) {
+      console.log("composeFinal already called, skipping");
+      return;
+    }
+
     const imgs = (imgsOverride ?? capturedDataUrls).slice(0, shotsCount);
     console.log("composeFinal called with:", {
       imageCount: imgs.length,
       expectedShots: shotsCount,
       selectedLayout: selectedLayout,
-      imageSources: imgs.map((img, i) => `${i}: ${img.substring(0, 50)}...`),
+      imageSources: imgs.map((img, i) => `${i}: ${img.substring(0, 50)}...`)
     });
 
     if (imgs.length === 0) return;
@@ -420,30 +415,25 @@ export default function BoothPage() {
     stopCamera();
 
     // Auto-save photo to database for compose functionality
-    await autoSavePhoto(canvas, imgs);
+    // await autoSavePhoto(canvas, imgs);
 
     // Save data to sessionStorage but don't auto-redirect
     try {
       const finalImage = canvas.toDataURL();
-      const imagesToSave = (imgsOverride ?? capturedDataUrls).slice(
-        0,
-        shotsCount
-      );
+      const imagesToSave = (imgsOverride ?? capturedDataUrls).slice(0, shotsCount);
       const payload = {
         images: imagesToSave, // Use original data URLs
         layout: selectedLayout,
         filter: selectedFilter,
         shots: shotsCount,
-        finalImage: finalImage,
+        finalImage: finalImage
       };
 
       console.log("Saving to sessionStorage:", {
         imageCount: imagesToSave.length,
         expectedShots: shotsCount,
         layout: selectedLayout,
-        imagePreviews: imagesToSave.map(
-          (img, i) => `${i}: ${img.substring(0, 50)}...`
-        ),
+        imagePreviews: imagesToSave.map((img, i) => `${i}: ${img.substring(0, 50)}...`)
       });
 
       sessionStorage.setItem("composePayload", JSON.stringify(payload));
@@ -453,10 +443,7 @@ export default function BoothPage() {
   }
 
   // Auto-save photo to database for compose functionality
-  async function autoSavePhoto(
-    canvas: HTMLCanvasElement,
-    imagesArray?: string[]
-  ) {
+  async function autoSavePhoto(canvas: HTMLCanvasElement, imagesArray?: string[]) {
     // Prevent double uploads
     if (savedPhotoId) {
       console.log("Photo already saved, skipping duplicate upload");
@@ -473,7 +460,7 @@ export default function BoothPage() {
         expectedShots: shotsCount,
         imagesToSave: imagesToSave.length,
         layout: selectedLayout,
-        usingProvidedArray: !!imagesArray,
+        usingProvidedArray: !!imagesArray
       });
 
       const body = {
@@ -485,14 +472,14 @@ export default function BoothPage() {
         // Include individual images for better compose support
         images: imagesToSave,
         // Flag to skip Cloudinary upload for booth photos
-        skipCloudinaryUpload: true,
+        skipCloudinaryUpload: true
       };
 
       const res = await fetch("/api/photos", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify(body)
       });
 
       if (res.ok) {
@@ -508,12 +495,11 @@ export default function BoothPage() {
   }
 
   function retakeCurrentShot() {
-    setCapturedDataUrls((prev) => {
-      const copy = [...prev];
-      copy.pop();
-      return copy;
-    });
+    const currentCaptured = [...capturedDataUrls];
+    currentCaptured.pop(); // Remove last photo
+    setCapturedDataUrls(currentCaptured);
     setPreviewCaptured(null);
+    setFinalComposed(false);
     startCamera();
   }
 
@@ -601,9 +587,7 @@ export default function BoothPage() {
                     <div className="flex items-center gap-2 md:gap-4">
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse shadow-lg"></div>
-                        <span className="font-bold text-sm tracking-wide">
-                          CAMERA READY
-                        </span>
+                        <span className="font-bold text-sm tracking-wide">CAMERA READY</span>
                       </div>
                       {capturedDataUrls.length > 0 && (
                         <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full border border-white/30">
@@ -634,30 +618,25 @@ export default function BoothPage() {
                       aria-label="Camera feed for photo booth"
                       style={{
                         display:
-                          finalComposed ||
-                          previewCaptured ||
-                          isLoading ||
-                          cameraError
+                          finalComposed || previewCaptured || isLoading || cameraError
                             ? "none"
                             : "block",
                         width: "100%",
                         height: "100%",
                         objectFit: "cover",
                         filter:
-                          AVAILABLE_FILTERS.find((f) => f.id === selectedFilter)
-                            ?.css ?? "none",
+                          AVAILABLE_FILTERS.find((f) => f.id === selectedFilter)?.css ?? "none"
                       }}
                     />
                     <canvas
                       ref={canvasRef}
                       aria-hidden={!finalComposed && !previewCaptured}
                       style={{
-                        display:
-                          finalComposed || previewCaptured ? "block" : "none",
+                        display: finalComposed || previewCaptured ? "block" : "none",
                         width: "100%",
                         height: "100%",
                         objectFit: "contain",
-                        backgroundColor: "#000",
+                        backgroundColor: "#000"
                       }}
                     />
 
@@ -670,12 +649,8 @@ export default function BoothPage() {
                       >
                         <div className="text-center text-white">
                           <Loader2 className="w-12 h-12 mx-auto mb-4 animate-spin" />
-                          <p className="text-lg font-medium">
-                            Initializing Camera...
-                          </p>
-                          <p className="text-sm text-white/80 mt-2">
-                            Please allow camera access
-                          </p>
+                          <p className="text-lg font-medium">Initializing Camera...</p>
+                          <p className="text-sm text-white/80 mt-2">Please allow camera access</p>
                         </div>
                       </motion.div>
                     )}
@@ -689,9 +664,7 @@ export default function BoothPage() {
                       >
                         <div className="text-center text-white max-w-md mx-auto p-6">
                           <AlertCircle className="w-16 h-16 mx-auto mb-4 text-red-400" />
-                          <h3 className="text-xl font-bold mb-2">
-                            Camera Access Required
-                          </h3>
+                          <h3 className="text-xl font-bold mb-2">Camera Access Required</h3>
                           <p className="text-white/80 mb-6">{cameraError}</p>
                           <button
                             onClick={startCamera}
@@ -711,9 +684,7 @@ export default function BoothPage() {
                       runningCountdown && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm">
                           <div className="bg-gradient-to-br from-red-600 to-red-500 w-24 h-24 rounded-full flex items-center justify-center shadow-2xl border-4 border-white animate-pulse">
-                            <span className="text-white text-3xl font-black">
-                              {countdown}
-                            </span>
+                            <span className="text-white text-3xl font-black">{countdown}</span>
                           </div>
                         </div>
                       )}
@@ -746,8 +717,8 @@ export default function BoothPage() {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={startCountdown}
-                                disabled={runningCountdown}
-                                className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white px-8 py-3 rounded-2xl font-bold text-sm transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 border border-red-400 flex items-center gap-2"
+                                disabled={runningCountdown || isCapturing || finalComposed}
+                                className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white px-8 py-3 rounded-2xl font-bold text-sm transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed border border-red-400 flex items-center gap-2"
                                 aria-label="Take photo (Space key)"
                               >
                                 <Camera className="w-4 h-4" />
@@ -762,15 +733,9 @@ export default function BoothPage() {
                               className="text-center"
                             >
                               <p className="text-xs text-white/80 bg-black/30 px-3 py-1 rounded-full backdrop-blur-sm">
-                                Press{" "}
-                                <kbd className="bg-white/20 px-1 rounded">
-                                  Space
-                                </kbd>{" "}
-                                to capture •{" "}
-                                <kbd className="bg-white/20 px-1 rounded">
-                                  Esc
-                                </kbd>{" "}
-                                to cancel
+                                Press <kbd className="bg-white/20 px-1 rounded">Space</kbd> to
+                                capture • <kbd className="bg-white/20 px-1 rounded">Esc</kbd> to
+                                cancel
                               </p>
                             </motion.div>
                           </div>
@@ -802,11 +767,7 @@ export default function BoothPage() {
                       className="w-full appearance-none px-3 py-2 pr-8 border border-slate-300 rounded-xl text-sm font-medium bg-gradient-to-r from-white to-slate-50 hover:from-slate-50 hover:to-slate-100 focus:border-red-500 focus:outline-none focus:ring-4 focus:ring-red-100 transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer"
                     >
                       {AVAILABLE_FILTERS.map((f) => (
-                        <option
-                          key={f.id}
-                          value={f.id}
-                          className="bg-white text-slate-900 py-2"
-                        >
+                        <option key={f.id} value={f.id} className="bg-white text-slate-900 py-2">
                           {f.label}
                         </option>
                       ))}
@@ -830,9 +791,7 @@ export default function BoothPage() {
                       1
                     </div>
                     <div>
-                      <h4 className="font-bold text-slate-900 mb-1 text-sm">
-                        Setup
-                      </h4>
+                      <h4 className="font-bold text-slate-900 mb-1 text-sm">Setup</h4>
                       <p className="text-xs text-slate-600">
                         Choose your filter and start the camera
                       </p>
@@ -843,12 +802,8 @@ export default function BoothPage() {
                       2
                     </div>
                     <div>
-                      <h4 className="font-bold text-slate-900 mb-1 text-sm">
-                        Capture
-                      </h4>
-                      <p className="text-xs text-slate-600">
-                        Take photos with 3-second countdown
-                      </p>
+                      <h4 className="font-bold text-slate-900 mb-1 text-sm">Capture</h4>
+                      <p className="text-xs text-slate-600">Take photos with 3-second countdown</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
@@ -856,12 +811,8 @@ export default function BoothPage() {
                       3
                     </div>
                     <div>
-                      <h4 className="font-bold text-slate-900 mb-1 text-sm">
-                        Edit
-                      </h4>
-                      <p className="text-xs text-slate-600">
-                        Go to editor for advanced options
-                      </p>
+                      <h4 className="font-bold text-slate-900 mb-1 text-sm">Edit</h4>
+                      <p className="text-xs text-slate-600">Go to editor for advanced options</p>
                     </div>
                   </div>
                 </div>
@@ -919,10 +870,13 @@ export default function BoothPage() {
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={() => {
+                              if (isCapturing || runningCountdown) return;
                               setPreviewCaptured(null);
+                              setFinalComposed(false);
                               startCamera();
                             }}
-                            className="w-full bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white px-4 py-3 rounded-xl font-bold text-sm transition-all duration-300 shadow-lg hover:shadow-xl border border-red-400 flex items-center gap-2 justify-center"
+                            disabled={isCapturing || runningCountdown}
+                            className="w-full bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white px-4 py-3 rounded-xl font-bold text-sm transition-all duration-300 shadow-lg hover:shadow-xl border border-red-400 flex items-center gap-2 justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                             aria-label="Continue to next photo"
                           >
                             <Zap className="w-4 h-4" />
@@ -935,9 +889,7 @@ export default function BoothPage() {
                             transition={{ delay: 1.0, duration: 0.5 }}
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
-                            onClick={() =>
-                              composeFinal().catch((e) => console.warn(e))
-                            }
+                            onClick={() => composeFinal().catch((e) => console.warn(e))}
                             className="w-full bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white px-4 py-3 rounded-xl font-bold text-sm transition-all duration-300 shadow-lg hover:shadow-xl border border-green-400 flex items-center gap-2 justify-center"
                             aria-label="Complete photo session"
                           >
