@@ -8,7 +8,7 @@ import {
   ImagePlay,
   ImagePlayIcon,
   ImageUpscale,
-  LucideIcon,
+  LucideIcon
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { cn } from "@/lib/utils";
@@ -20,7 +20,7 @@ const layouts = [
     shots: 1,
     description: "Perfect for portraits and selfies",
     icon: Camera,
-    preview: "/frames/single-preview.png",
+    preview: "/frames/single-preview.png"
   },
   {
     id: "double-vertical",
@@ -28,7 +28,7 @@ const layouts = [
     shots: 2,
     description: "Two photos stacked vertically",
     icon: Camera,
-    preview: "/frames/double-vertical-preview.png",
+    preview: "/frames/double-vertical-preview.png"
   },
   {
     id: "double-horizontal",
@@ -36,7 +36,7 @@ const layouts = [
     shots: 2,
     description: "Two photos side by side",
     icon: ImageIcon,
-    preview: "/frames/double-horizontal-preview.png",
+    preview: "/frames/double-horizontal-preview.png"
   },
   {
     id: "triple-vertical",
@@ -44,7 +44,7 @@ const layouts = [
     shots: 3,
     description: "Three photos arranged artistically",
     icon: ImagePlay,
-    preview: "/frames/collage-preview.png",
+    preview: "/frames/collage-preview.png"
   },
   {
     id: "quad-vertical",
@@ -52,7 +52,7 @@ const layouts = [
     shots: 4,
     description: "Four photos stacked vertically",
     icon: ImagePlayIcon,
-    preview: "/frames/quad-preview.png",
+    preview: "/frames/quad-preview.png"
   },
   {
     id: "quad-horizontal",
@@ -60,8 +60,8 @@ const layouts = [
     shots: 4,
     description: "Four photos arranged horizontally",
     icon: ImageUpscale,
-    preview: "/frames/quad-horizontal-preview.png",
-  },
+    preview: "/frames/quad-horizontal-preview.png"
+  }
 ];
 
 export default function LayoutSelectionPage() {
@@ -84,12 +84,15 @@ export default function LayoutSelectionPage() {
     // Save layout selection to sessionStorage
     const selectedLayoutData = layouts.find((l) => l.id === selectedLayout);
     if (selectedLayoutData) {
+      // Clear all session storage data first
+      sessionStorage.clear();
+
       sessionStorage.setItem(
         "selectedLayout",
         JSON.stringify({
           id: selectedLayoutData.id,
           shots: selectedLayoutData.shots,
-          name: selectedLayoutData.name,
+          name: selectedLayoutData.name
         })
       );
     }
@@ -108,16 +111,14 @@ export default function LayoutSelectionPage() {
           <div className="mb-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200/50 shadow-sm mb-6">
               <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-              <span className="text-sm font-medium text-slate-700">
-                Step 1 of 2
-              </span>
+              <span className="text-sm font-medium text-slate-700">Step 1 of 2</span>
             </div>
             <h1 className="text-5xl md:text-6xl font-black mb-6 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 bg-clip-text text-transparent leading-[1.1]">
               Choose Your Perfect Layout
             </h1>
             <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed font-light">
-              Select the ideal photo layout for your session. Each option is
-              designed to capture your memories in a unique and beautiful way.
+              Select the ideal photo layout for your session. Each option is designed to capture
+              your memories in a unique and beautiful way.
             </p>
           </div>
 
@@ -127,18 +128,14 @@ export default function LayoutSelectionPage() {
               <div className="w-10 h-10 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-lg">
                 1
               </div>
-              <span className="text-red-600 font-semibold text-lg">
-                Choose Layout
-              </span>
+              <span className="text-red-600 font-semibold text-lg">Choose Layout</span>
             </div>
             <div className="w-16 h-1 bg-gradient-to-r from-red-500 to-slate-300 rounded-full"></div>
             <div className="flex items-center space-x-3 opacity-50">
               <div className="w-10 h-10 bg-slate-300 text-slate-500 rounded-full flex items-center justify-center text-sm font-bold">
                 2
               </div>
-              <span className="text-slate-500 font-semibold text-lg">
-                Photo Booth
-              </span>
+              <span className="text-slate-500 font-semibold text-lg">Photo Booth</span>
             </div>
           </div>
         </div>
@@ -180,20 +177,15 @@ export default function LayoutSelectionPage() {
             <div className="mt-8 p-6 bg-white rounded-2xl shadow-xl border border-red-200/50 max-w-md mx-auto">
               <div className="flex items-center justify-center space-x-4">
                 {(() => {
-                  const Icon = layouts.find(
-                    (l) => l.id === selectedLayout
-                  )?.icon;
-                  return Icon ? (
-                    <Icon className="w-8 h-8 text-red-500" />
-                  ) : null;
+                  const Icon = layouts.find((l) => l.id === selectedLayout)?.icon;
+                  return Icon ? <Icon className="w-8 h-8 text-red-500" /> : null;
                 })()}
                 <div className="text-left">
                   <p className="font-bold text-slate-900 text-lg">
                     {layouts.find((l) => l.id === selectedLayout)?.name}
                   </p>
                   <p className="text-sm text-slate-600">
-                    {layouts.find((l) => l.id === selectedLayout)?.shots} photos
-                    will be taken
+                    {layouts.find((l) => l.id === selectedLayout)?.shots} photos will be taken
                   </p>
                 </div>
               </div>
@@ -209,7 +201,7 @@ export default function LayoutSelectionPage() {
 const LayoutHoverEffect = ({
   layouts,
   selectedLayout,
-  onLayoutSelect,
+  onLayoutSelect
 }: {
   layouts: Array<{
     id: string;
@@ -242,11 +234,11 @@ const LayoutHoverEffect = ({
                 initial={{ opacity: 0 }}
                 animate={{
                   opacity: 1,
-                  transition: { duration: 0.15 },
+                  transition: { duration: 0.15 }
                 }}
                 exit={{
                   opacity: 0,
-                  transition: { duration: 0.15, delay: 0.2 },
+                  transition: { duration: 0.15, delay: 0.2 }
                 }}
               />
             )}

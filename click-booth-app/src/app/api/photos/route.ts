@@ -203,49 +203,39 @@ export async function POST(req: Request) {
         });
       }
     } else {
+      // Upload baru jika belum ada foto recent
+      console.log("No existing photo found, uploading new for cloud save");
+      const uploadResult = await uploadBufferToCloudinary(buffer, {
+        folder: "click-booth",
+        resource_type: "image",
+        use_filename: true,
+        unique_filename: true
+      });
+
+      if (!uploadResult?.secure_url)
+        throw { message: "Cloudinary did not return secure_url", status: 502 };
+
+      url = uploadResult.secure_url;
+      publicId = uploadResult.public_id;
+      isNewUpload = true;
+
+      // Simpan ke DB
+      created = await PhotoModel.createPhoto({
+        userId: userId ? new ObjectId(userId) : null,
+        url,
+        publicId,
+        frame: body.frame,
+        stickers: body.stickers,
+        watermark: body.watermark,
+        filter: body.filter ?? undefined,
+        shots: typeof body.shots === "number" ? body.shots : undefined,
+        layout: body.layout ?? undefined,
+        images: body.images ?? [],
+        enhancedUrl: url,
+        aiEnhanced: false
+      });
       // Untuk save to cloud, cek dulu apakah sudah ada foto recent
       console.log("Processing cloud save request");
-      const existingPhoto = await findExistingPhoto(userId);
-
-      if (existingPhoto && existingPhoto.url) {
-        // Gunakan foto yang sudah ada, tidak upload lagi
-        url = existingPhoto.url;
-        publicId = existingPhoto.publicId || "";
-        created = existingPhoto;
-        console.log("Using existing photo for cloud save (no new upload):", url);
-      } else {
-        // Upload baru jika belum ada foto recent
-        console.log("No existing photo found, uploading new for cloud save");
-        const uploadResult = await uploadBufferToCloudinary(buffer, {
-          folder: "click-booth",
-          resource_type: "image",
-          use_filename: true,
-          unique_filename: true
-        });
-
-        if (!uploadResult?.secure_url)
-          throw { message: "Cloudinary did not return secure_url", status: 502 };
-
-        url = uploadResult.secure_url;
-        publicId = uploadResult.public_id;
-        isNewUpload = true;
-
-        // Simpan ke DB
-        created = await PhotoModel.createPhoto({
-          userId: userId ? new ObjectId(userId) : null,
-          url,
-          publicId,
-          frame: body.frame,
-          stickers: body.stickers,
-          watermark: body.watermark,
-          filter: body.filter ?? undefined,
-          shots: typeof body.shots === "number" ? body.shots : undefined,
-          layout: body.layout ?? undefined,
-          images: body.images ?? [],
-          enhancedUrl: url,
-          aiEnhanced: false
-        });
-      }
     }
 
     //share ke WhatsApp via fonnte
