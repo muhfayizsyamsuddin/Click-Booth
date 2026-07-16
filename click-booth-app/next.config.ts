@@ -80,6 +80,7 @@ const nextConfig: NextConfig = {
   },
   // Development configuration to suppress certain warnings
   reactStrictMode: true,
+  output: "standalone",
 };
 
 export default nextConfig;

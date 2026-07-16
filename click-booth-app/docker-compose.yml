@@ -1,0 +1,38 @@
+services:
+  app:
+    # build:
+    #   context: .
+    image: faizms14/click-booth-app:v1.0
+    env_file: .env
+    networks:
+      - proxy_net
+      - click-booth-net
+    labels:
+      traefik.enable: true
+      traefik.docker.network: proxy_net
+      traefik.http.routers.clickbooth.rule: Host(`clickbooth.faizms.com`)
+      traefik.http.routers.clickbooth.entrypoints: websecure
+      traefik.http.routers.clickbooth.tls.certresolver: myresolver
+      traefik.http.services.clickbooth.loadbalancer.server.port: 3000
+
+  database:
+    image: mongo:latest
+    container_name: click-booth-db
+    # ports:
+    #   - 27017:27017
+    networks:
+      - click-booth-net
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=click-booth-user
+      - MONGO_INITDB_ROOT_PASSWORD=click-booth-password
+      - MONGO_INITDB_DATABASE=click-booth-db
+    volumes:
+      - click-booth-db-data:/data/db
+
+networks:
+  click-booth-net:
+    driver: bridge
+  proxy_net:
+    external: true
+volumes:
+  click-booth-db-data:
