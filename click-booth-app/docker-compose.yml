@@ -2,7 +2,7 @@ services:
   app:
     # build:
     #   context: .
-    image: faizms14/click-booth-app:v1.0
+    image: faizms14/click-booth-app:v1.1
     env_file: .env
     networks:
       - proxy_net
