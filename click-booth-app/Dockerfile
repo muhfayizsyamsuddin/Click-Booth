@@ -14,6 +14,7 @@ ENV NODE_ENV=production
 COPY package.json package-lock.json ./
 RUN npm install
 COPY --from=builder /app/.next /app/.next
+COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json /app/package-lock.json ./
 
 EXPOSE 3000
