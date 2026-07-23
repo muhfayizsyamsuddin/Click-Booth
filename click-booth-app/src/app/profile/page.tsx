@@ -365,29 +365,6 @@ export default function ProfilePage() {
       transition={{ duration: 0.5 }}
       className="min-h-screen bg-amber-50"
     >
-      {/* Header */}
-      {/* <motion.div
-        initial={{ y: -50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.1 }}
-        className="bg-white border-b border-amber-200 shadow-sm"
-      >
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <motion.div
-            initial={{ x: -30, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            <h1 className="flex items-center gap-2 text-4xl font-bold text-slate-800 mb-2">
-              <User className="w-8 h-8 text-slate-700" />
-              My Profile
-            </h1>
-            <p className="text-slate-600 text-lg">
-              Manage your account and view your photo memories
-            </p>
-          </motion.div>
-        </div>
-      </motion.div> */}
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-16">
@@ -427,11 +404,6 @@ export default function ProfilePage() {
             className="lg:col-span-1"
           >
             <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border border-amber-200/50 p-8 sticky top-8">
-              {/* Profile Avatar */}
-              {/* <h1 className="flex items-center gap-2 text-4xl font-bold text-slate-800 mb-2">
-                <User className="w-8 h-8 text-slate-700" />
-                My Profile
-              </h1> */}
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
@@ -568,30 +540,6 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                {/* New Achievement Card */}
-                {/* <div className="flex items-center space-x-4 p-4 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-2xl border border-yellow-200">
-                  <Trophy className="w-6 h-6 text-yellow-600" />
-                  <div>
-                    <p className="text-sm text-slate-500 font-medium">
-                      Achievement Level
-                    </p>
-                    <p className="text-slate-800 font-semibold flex items-center space-x-1">
-                      <span>
-                        {photos.length >= 50
-                          ? "Pro Photographer"
-                          : photos.length >= 20
-                          ? "Advanced User"
-                          : photos.length >= 5
-                          ? "Photo Enthusiast"
-                          : "Beginner"}
-                      </span>
-                      {photos.length >= 20 && (
-                        <Crown className="w-4 h-4 text-yellow-600" />
-                      )}
-                    </p>
-                  </div>
-                </div> */}
-
                 {/* User Status Card */}
                 <div className="flex items-center space-x-4 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl border border-blue-200">
                   <BadgeCheck className="w-6 h-6 text-blue-600" />
@@ -614,42 +562,6 @@ export default function ProfilePage() {
                 transition={{ duration: 0.6, delay: 0.5 }}
                 className="mt-8 space-y-3"
               >
-                {/* <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full bg-amber-500 hover:bg-amber-600 text-white p-4 rounded-2xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
-                >
-                  <Settings className="w-5 h-5" />
-                  <span>Account Settings</span>
-                </motion.button> */}
-
-                {/* New Action Buttons */}
-                {/* <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white p-4 rounded-2xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
-                >
-                  <Wand2 className="w-5 h-5" />
-                  <span>AI Photo Enhance</span>
-                </motion.button> */}
-
-                {/* <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white p-4 rounded-2xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
-                >
-                  <Gift className="w-5 h-5" />
-                  <span>Redeem Rewards</span>
-                </motion.button> */}
-
-                {/* <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white p-4 rounded-2xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
-                >
-                  <TrendingUp className="w-5 h-5" />
-                  <span>View Analytics</span>
-                </motion.button> */}
 
                 <motion.button
                   whileHover={{ scale: 1.02 }}
@@ -841,12 +753,12 @@ export default function ProfilePage() {
                           </div>
                         )}
 
-                        <Image
+                        <img
                           src={
                             photo.thumbUrl || photo.url || "/placeholder.svg"
                           }
                           alt="Photo"
-                          fill
+                          // fill
                           className="object-cover group-hover:scale-110 transition-transform duration-500"
                           sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           loading="lazy"
@@ -883,24 +795,6 @@ export default function ProfilePage() {
                           >
                             <Download className="w-4 h-4" />
                           </motion.button>
-
-                          {/* <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            className="bg-pink-100 hover:bg-pink-200 text-pink-700 p-2 rounded-xl transition-all duration-200"
-                            title="Add to Favorites"
-                          >
-                            <Heart className="w-4 h-4" />
-                          </motion.button> */}
-
-                          {/* <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            className="bg-purple-100 hover:bg-purple-200 text-purple-700 p-2 rounded-xl transition-all duration-200"
-                            title="Apply Filter"
-                          >
-                            <Filter className="w-4 h-4" />
-                          </motion.button> */}
 
                           <motion.button
                             whileHover={{ scale: 1.1 }}
@@ -953,14 +847,14 @@ export default function ProfilePage() {
                           className="flex-shrink-0 cursor-pointer group"
                         >
                           <div className="w-20 h-20 rounded-2xl overflow-hidden relative shadow-lg">
-                            <Image
+                            <img
                               src={
                                 photo.thumbUrl ||
                                 photo.url ||
                                 "/placeholder.svg"
                               }
                               alt="Photo thumbnail"
-                              fill
+                              // fill
                               className="object-cover group-hover:scale-110 transition-transform duration-500"
                               sizes="80px"
                               loading="lazy"
@@ -1124,13 +1018,13 @@ export default function ProfilePage() {
                 transition={{ duration: 0.4, delay: 0.2 }}
                 className="relative bg-gray-100 rounded-2xl overflow-hidden mb-6"
               >
-                <Image
+                <img
                   src={selected.url || "/placeholder.svg"}
                   alt="Full size photo"
                   width={800}
                   height={600}
                   className="w-full h-auto object-contain max-h-[60vh]"
-                  priority
+                  // priority
                 />
               </motion.div>
 
