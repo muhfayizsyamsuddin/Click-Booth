@@ -1535,7 +1535,7 @@ export default function AdminPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <div className="w-12 h-12 rounded-xl bg-peach-100 border border-peach-200 flex items-center justify-center mr-4 overflow-hidden">
-                      <Image
+                      <img
                         src={isEditMode ? editIcon : selectedStyle.icon}
                         alt={isEditMode ? editName : selectedStyle.name}
                         width={40}
@@ -1660,7 +1660,7 @@ export default function AdminPage() {
                   ) : (
                     <div className="px-4 py-3 bg-cream-50 rounded-lg border border-cream-200 flex items-center">
                       <div className="w-14 h-14 rounded-xl bg-peach-100 border border-peach-200 flex items-center justify-center mr-4 overflow-hidden">
-                        <Image
+                        <img
                           src={selectedStyle.icon}
                           alt={selectedStyle.name}
                           width={48}
