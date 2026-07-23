@@ -45,4 +45,5 @@ jobs:
                   mkdir -p ~/project/clickbooth
                   cd ~/project/clickbooth
                   echo ${{ vars.APP_COMPOSE }} | base64 -d > docker-compose.yml
+                  docker compose pull
                   docker compose up -d
