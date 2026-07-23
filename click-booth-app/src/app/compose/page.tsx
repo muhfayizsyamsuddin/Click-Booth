@@ -1265,9 +1265,15 @@ export default function ComposePage() {
 
   // === Generate with AI using current preview (canvas) ===
   const handleGenerateAI = async (bypassFrameCheck = false) => {
+    console.log("=== HANDLE GENERATE AI CALLED ===");
     setAiErr(null);
-    if (!canvasRef.current) return;
+    // if (!canvasRef.current) return;
+    if (!canvasRef.current) {
+  console.log("canvas null");
+  return;
+}
     if (!aiPrompt) {
+      console.log("aiPrompt =", aiPrompt);
       setAiErr("Pilih gaya AI terlebih dahulu.");
       return;
     }
@@ -1297,6 +1303,7 @@ export default function ComposePage() {
 
     try {
       if (!currentUser) {
+        console.log(currentUser);
         Swal.fire({
           icon: "warning",
           title: "Please Login",
@@ -1306,6 +1313,7 @@ export default function ComposePage() {
       }
 
       if (currentUser.tokens <= 0) {
+        console.log("tokens =", currentUser.tokens);
         Swal.fire({
           icon: "warning",
           title: "Insufficient Tokens",
@@ -1332,11 +1340,12 @@ export default function ComposePage() {
       formData.append("image", imageFile);
       formData.append("prompt", aiPrompt);
       formData.append("size", size);
-
+      
       const response = await fetch("/api/style", {
         method: "POST",
         body: formData,
       });
+      console.log("Sending request...");
 
       if (!response.ok) {
         const text = await response.text();
@@ -1344,6 +1353,7 @@ export default function ComposePage() {
         setIsGenerating(false);
         return;
       }
+      console.log(response.status);
 
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
