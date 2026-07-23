@@ -1777,7 +1777,7 @@ export default function ComposePage() {
                               }`}
                             >
                               <div className="w-4 h-4 rounded-full overflow-hidden flex-shrink-0">
-                                <Image
+                                <img
                                   src={ai.icon}
                                   alt={ai.name}
                                   className="w-full h-full object-cover"
