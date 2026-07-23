@@ -880,7 +880,7 @@ export default function AdminPage() {
                     </td>
                     <td className="px-8 py-6 whitespace-nowrap">
                       <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center overflow-hidden border border-white shadow-lg">
-                        <Image
+                        <img
                           src={ai.icon}
                           alt={ai.name}
                           width={40}
