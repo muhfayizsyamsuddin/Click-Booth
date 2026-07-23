@@ -2,6 +2,7 @@ import { UserModel } from "@/db/models/UserModel";
 import errorHandler from "@/helpers/errHandler";
 
 export async function POST(req: Request) {
+  console.log("=== REGISTER ROUTE HIT ===");
   try {
     const body = await req.json();
     console.log("REGISTER BODY:", body);
