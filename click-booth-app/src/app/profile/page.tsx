@@ -117,10 +117,10 @@ export default function ProfilePage() {
     async (next = false) => {
       try {
         const userData = getUserFromCookiesClient();
-        console.log("loadPhotos - userData:", userData);
+        // console.log("loadPhotos - userData:", userData);
 
         if (!userData) {
-          console.log("loadPhotos - no user data, skipping");
+          // console.log("loadPhotos - no user data, skipping");
           return;
         }
 
@@ -129,7 +129,7 @@ export default function ProfilePage() {
         const limit = 24;
 
         const token = getAuthTokenFromCookies();
-        console.log("loadPhotos - token:", token ? "exists" : "not found");
+        // console.log("loadPhotos - token:", token ? "exists" : "not found");
 
         const response = await fetch(
           `/api/photos?mine=true&limit=${limit}&skip=${skip}`,
@@ -142,11 +142,11 @@ export default function ProfilePage() {
           }
         );
 
-        console.log("loadPhotos - API response status:", response.status);
+        // console.log("loadPhotos - API response status:", response.status);
 
         if (response.ok) {
           const data = await response.json();
-          console.log("loadPhotos - received data:", data);
+          // console.log("loadPhotos - received data:", data);
           const newPhotos = Array.isArray(data.photos) ? data.photos : [];
           setPhotos((prev) => (next ? [...prev, ...newPhotos] : newPhotos));
           setHasMore(newPhotos.length === limit);
@@ -214,7 +214,7 @@ export default function ProfilePage() {
       setError(""); // Clear previous errors
 
       const userData = getUserFromCookiesClient();
-      console.log("userData from cookies:", userData);
+      // console.log("userData from cookies:", userData);
 
       if (!userData) {
         throw new Error(
@@ -223,7 +223,7 @@ export default function ProfilePage() {
       }
 
       const token = getAuthTokenFromCookies();
-      console.log("token:", token ? "exists" : "not found");
+      // console.log("token:", token ? "exists" : "not found");
 
       if (!token) {
         throw new Error("Authentication token not found");
@@ -235,7 +235,7 @@ export default function ProfilePage() {
         },
       });
 
-      console.log("API response status:", response.status);
+      // console.log("API response status:", response.status);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -244,7 +244,7 @@ export default function ProfilePage() {
       }
 
       const profileData = await response.json();
-      console.log("Profile data received:", profileData);
+      // console.log("Profile data received:", profileData);
 
       // Map the API response to UserProfile interface
       const userProfile: UserProfile = {

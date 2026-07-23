@@ -64,12 +64,12 @@ function generateFramesForLayout(
     layoutId === "triple-vertical";
   const isHorizontalLayout = layoutId?.includes("horizontal");
 
-  console.log("Generating frames for layout:", {
-    layoutId,
-    shotsCount,
-    isVerticalLayout,
-    isHorizontalLayout,
-  });
+  // console.log("Generating frames for layout:", {
+  //   layoutId,
+  //   shotsCount,
+  //   isVerticalLayout,
+  //   isHorizontalLayout,
+  // });
 
   // Color variations for strips
   const colorVariations = [
@@ -246,7 +246,7 @@ export default function ComposePage() {
       if (photoId) {
         // Load from database
         try {
-          console.log("Loading photo from DB with ID:", photoId);
+          // console.log("Loading photo from DB with ID:", photoId);
           const response = await fetch(`/api/photos/${photoId}`);
           if (response.ok) {
             const data = await response.json();
@@ -280,13 +280,13 @@ export default function ComposePage() {
               setSelectedPhoto(photo.url);
             }
 
-            console.log("Loaded photo from DB:", {
-              photoId,
-              shots: shotsCount,
-              layout: layoutId,
-              url: photo.url,
-              imageCount: photo.images?.length || 0,
-            });
+            // console.log("Loaded photo from DB:", {
+            //   photoId,
+            //   shots: shotsCount,
+            //   layout: layoutId,
+            //   url: photo.url,
+            //   imageCount: photo.images?.length || 0,
+            // });
 
             setIsLoading(false);
             return; // Exit early if DB load successful
@@ -299,10 +299,10 @@ export default function ComposePage() {
       if (!isMounted) return; // Exit if component unmounted
 
       // Fallback to sessionStorage (original behavior)
-      console.log("Loading from sessionStorage");
+      // console.log("Loading from sessionStorage");
       const savedPhotos = sessionStorage.getItem("capturedPhotos");
       const savedLayout = sessionStorage.getItem("selectedLayout");
-      console.log("Saved Photos:", savedPhotos);
+      // console.log("Saved Photos:", savedPhotos);
       const composePayload = sessionStorage.getItem("composePayload");
 
       if (composePayload) {
@@ -310,15 +310,15 @@ export default function ComposePage() {
           const payload = JSON.parse(composePayload);
           const photos = payload.images || [];
 
-          console.log("Loaded composePayload from sessionStorage:", {
-            totalImages: photos.length,
-            expectedShots: payload.shots,
-            layout: payload.layout,
-            imagePreviews: photos.map(
-              (img: string, i: number) => `${i}: ${img.substring(0, 50)}...`
-            ),
-            allImagesUnique: photos.length === new Set(photos).size,
-          });
+          // console.log("Loaded composePayload from sessionStorage:", {
+          //   totalImages: photos.length,
+          //   expectedShots: payload.shots,
+          //   layout: payload.layout,
+          //   imagePreviews: photos.map(
+          //     (img: string, i: number) => `${i}: ${img.substring(0, 50)}...`
+          //   ),
+          //   allImagesUnique: photos.length === new Set(photos).size,
+          // });
 
           setCapturedPhotos(photos);
           // setOriginalPhotos(photos); // Store original photos from sessionStorage
@@ -335,7 +335,7 @@ export default function ComposePage() {
           setAvailableFrames(framesForLayout);
           setSelectedFrame(framesForLayout[0]);
 
-          console.log("Photos loaded successfully from sessionStorage");
+          // console.log("Photos loaded successfully from sessionStorage");
         } catch (e) {
           console.warn("Failed to load compose payload:", e);
         }
@@ -456,13 +456,13 @@ export default function ComposePage() {
   // Redraw on updates with debounce to prevent multiple rapid calls
   useEffect(() => {
     if (selectedPhoto && canvasRef.current && !isLoading && !isRendering) {
-      console.log("useEffect triggered for canvas render", {
-        selectedPhoto: !!selectedPhoto,
-        selectedFrameId: selectedFrame.id,
-        aiGeneratedImage: !!aiGeneratedImage,
-        isLoading,
-        isRendering,
-      });
+      // console.log("useEffect triggered for canvas render", {
+      //   selectedPhoto: !!selectedPhoto,
+      //   selectedFrameId: selectedFrame.id,
+      //   aiGeneratedImage: !!aiGeneratedImage,
+      //   isLoading,
+      //   isRendering,
+      // });
 
       const timeoutId = setTimeout(() => {
         drawComposition();
@@ -485,18 +485,18 @@ export default function ComposePage() {
 
     // Prevent drawing if already rendering
     if (isRendering) {
-      console.log("Skipping draw - already rendering");
+      // console.log("Skipping draw - already rendering");
       return;
     }
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    console.log("Drawing composition:", {
-      frameType: selectedFrame.type,
-      frameId: selectedFrame.id,
-      hasAI: !!aiGeneratedImage,
-    });
+    // console.log("Drawing composition:", {
+    //   frameType: selectedFrame.type,
+    //   frameId: selectedFrame.id,
+    //   hasAI: !!aiGeneratedImage,
+    // });
 
     if (selectedFrame.type === "strip" && selectedFrame.stripConfig) {
       drawPhotoboothStrip(ctx, canvas);
@@ -510,14 +510,14 @@ export default function ComposePage() {
   ) => {
     const config = selectedFrame.stripConfig!;
 
-    console.log("Drawing strip frame:", {
-      frameId: selectedFrame.id,
-      frameName: selectedFrame.name,
-      frameColor: selectedFrame.stripConfig?.background,
-      hasAI: !!aiGeneratedImage,
-      isRendering: isRendering,
-      timestamp: Date.now(),
-    });
+    // console.log("Drawing strip frame:", {
+    //   frameId: selectedFrame.id,
+    //   frameName: selectedFrame.name,
+    //   frameColor: selectedFrame.stripConfig?.background,
+    //   hasAI: !!aiGeneratedImage,
+    //   isRendering: isRendering,
+    //   timestamp: Date.now(),
+    // });
 
     // Get photos from various sources (DB, sessionStorage, or current captured photos)
     let photos: string[] = [];
@@ -562,19 +562,19 @@ export default function ComposePage() {
     }
 
     // Debug logging to track photo sources
-    console.log("Drawing strip with photos:", {
-      source: aiGeneratedImage
-        ? "AI-overlay"
-        : dbPhotoData?.images?.length
-        ? "DB-images"
-        : dbPhotoData
-        ? "DB-main"
-        : "sessionStorage",
-      photoCount: photos.length,
-      expectedCount: config.photoCount,
-      hasAI: !!aiGeneratedImage,
-      photos: photos.map((p, i) => `${i}: ${p.substring(0, 50)}...`),
-    });
+    // console.log("Drawing strip with photos:", {
+    //   source: aiGeneratedImage
+    //     ? "AI-overlay"
+    //     : dbPhotoData?.images?.length
+    //     ? "DB-images"
+    //     : dbPhotoData
+    //     ? "DB-main"
+    //     : "sessionStorage",
+    //   photoCount: photos.length,
+    //   expectedCount: config.photoCount,
+    //   hasAI: !!aiGeneratedImage,
+    //   photos: photos.map((p, i) => `${i}: ${p.substring(0, 50)}...`),
+    // });
 
     // Don't duplicate photos - use only available photos
     if (photos.length === 0) return;
@@ -583,12 +583,12 @@ export default function ComposePage() {
     const actualPhotoCount = Math.min(photos.length, config.photoCount);
     const photosToUse = photos.slice(0, actualPhotoCount);
 
-    console.log("Photo count control:", {
-      totalPhotosAvailable: photos.length,
-      configPhotoCount: config.photoCount,
-      actualPhotoCount: actualPhotoCount,
-      photosToUseLength: photosToUse.length,
-    });
+    // console.log("Photo count control:", {
+    //   totalPhotosAvailable: photos.length,
+    //   configPhotoCount: config.photoCount,
+    //   actualPhotoCount: actualPhotoCount,
+    //   photosToUseLength: photosToUse.length,
+    // });
 
     // Calculate canvas size for strip using actual photo count
     const photoWidth = 300;
@@ -663,14 +663,14 @@ export default function ComposePage() {
     );
 
     Promise.all(loadedImages).then((images) => {
-      console.log("Images loaded for strip, applying layers:", {
-        imageCount: images.length,
-        actualPhotoCount: actualPhotoCount,
-        expectedCount: config.photoCount,
-        hasAI: !!aiGeneratedImage,
-        frameId: selectedFrame.id,
-        frameHasSrc: !!selectedFrame.src,
-      });
+      // console.log("Images loaded for strip, applying layers:", {
+      //   imageCount: images.length,
+      //   actualPhotoCount: actualPhotoCount,
+      //   expectedCount: config.photoCount,
+      //   hasAI: !!aiGeneratedImage,
+      //   frameId: selectedFrame.id,
+      //   frameHasSrc: !!selectedFrame.src,
+      // });
 
       // IMPORTANT: If AI is available, DON'T draw original photos first
       // Only draw AI photos or original photos, not both
@@ -678,7 +678,7 @@ export default function ComposePage() {
       // Conditional drawing: AI photos OR original photos (not both)
       const applyAIAndFrame = () => {
         if (aiGeneratedImage) {
-          console.log("Drawing AI strip with cropped sections (no duplicates)");
+          // console.log("Drawing AI strip with cropped sections (no duplicates)");
           const aiImg = document.createElement("img");
           aiImg.crossOrigin = "anonymous";
           aiImg.onload = () => {
@@ -756,18 +756,18 @@ export default function ComposePage() {
 
             // Apply frame image if it exists (for hybrid frames)
             if (selectedFrame.src) {
-              console.log("Applying frame image after AI:", selectedFrame.name);
+              // console.log("Applying frame image after AI:", selectedFrame.name);
               const frameImg = document.createElement("img");
               frameImg.onload = () => {
                 ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
-                console.log("Frame image applied successfully after AI");
+                // console.log("Frame image applied successfully after AI");
 
                 // Add logo + branding after frame
                 drawLogoAndBranding(ctx, canvas, config);
               };
               frameImg.src = selectedFrame.src;
             } else {
-              console.log("  Adding logo + branding after strip color overlay");
+              // console.log("  Adding logo + branding after strip color overlay");
               // Add logo + branding after color overlay
               drawLogoAndBranding(ctx, canvas, config);
             }
@@ -775,9 +775,9 @@ export default function ComposePage() {
           aiImg.src = aiGeneratedImage;
         } else {
           // No AI - draw original photos ONLY with proportional scaling
-          console.log(
-            "Drawing original photos only (no AI) with proportional scaling"
-          );
+          // console.log(
+          //   "Drawing original photos only (no AI) with proportional scaling"
+          // );
           images.slice(0, actualPhotoCount).forEach((img, index) => {
             let photoX, photoY;
             if (config.orientation === "vertical") {
@@ -802,11 +802,11 @@ export default function ComposePage() {
           // Apply frame if exists
           if (selectedFrame.src) {
             // Apply frame directly if no AI
-            console.log("Applying frame without AI:", selectedFrame.name);
+            // console.log("Applying frame without AI:", selectedFrame.name);
             const frameImg = document.createElement("img");
             frameImg.onload = () => {
               ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
-              console.log("Frame applied successfully without AI");
+              // console.log("Frame applied successfully without AI");
 
               // Add logo + branding after frame
               drawLogoAndBranding(ctx, canvas, config);
@@ -814,7 +814,7 @@ export default function ComposePage() {
             frameImg.src = selectedFrame.src;
           } else {
             // Just logo + branding if no AI and no frame
-            console.log("📝 Applying logo + branding only (no AI, no frame)");
+            // console.log("📝 Applying logo + branding only (no AI, no frame)");
             drawLogoAndBranding(ctx, canvas, config);
           }
         }
@@ -937,14 +937,14 @@ export default function ComposePage() {
       }
     }
 
-    console.log("Drawing regular frame with photos:", {
-      photoCount: photos.length,
-      layoutInfo: layoutInfo,
-      hasAI: !!aiGeneratedImage,
-      photos: photos.map(
-        (p: string, i: number) => `${i}: ${p.substring(0, 50)}...`
-      ),
-    });
+    // console.log("Drawing regular frame with photos:", {
+    //   photoCount: photos.length,
+    //   layoutInfo: layoutInfo,
+    //   hasAI: !!aiGeneratedImage,
+    //   photos: photos.map(
+    //     (p: string, i: number) => `${i}: ${p.substring(0, 50)}...`
+    //   ),
+    // });
 
     if (photos.length === 0) return;
 
@@ -1220,16 +1220,16 @@ export default function ComposePage() {
 
   // === Handle frame change to prevent stacking ===
   const handleFrameChange = (frame: Frame) => {
-    console.log("Frame change requested:", {
-      from: selectedFrame.name,
-      to: frame.name,
-      hasAI: !!aiGeneratedImage,
-      isRendering: isRendering,
-    });
+    // console.log("Frame change requested:", {
+    //   from: selectedFrame.name,
+    //   to: frame.name,
+    //   hasAI: !!aiGeneratedImage,
+    //   isRendering: isRendering,
+    // });
 
     // Prevent multiple simultaneous renders
     if (isRendering) {
-      console.log("⏳ Render in progress, ignoring frame change");
+      // console.log("⏳ Render in progress, ignoring frame change");
       return;
     }
 
@@ -1245,7 +1245,7 @@ export default function ComposePage() {
     // Allow render to complete before accepting new changes - increased timeout
     renderTimeoutRef.current = setTimeout(() => {
       setIsRendering(false);
-      console.log("Frame change complete, ready for next change");
+      // console.log("Frame change complete, ready for next change");
     }, 300); // Increased from 100ms to 300ms
 
     // DON'T reset photos - this causes duplication
@@ -1265,15 +1265,14 @@ export default function ComposePage() {
 
   // === Generate with AI using current preview (canvas) ===
   const handleGenerateAI = async (bypassFrameCheck = false) => {
-    console.log("=== HANDLE GENERATE AI CALLED ===");
     setAiErr(null);
     // if (!canvasRef.current) return;
     if (!canvasRef.current) {
-  console.log("canvas null");
+  // console.log("canvas null");
   return;
 }
     if (!aiPrompt) {
-      console.log("aiPrompt =", aiPrompt);
+      // console.log("aiPrompt =", aiPrompt);
       setAiErr("Pilih gaya AI terlebih dahulu.");
       return;
     }
@@ -1303,7 +1302,7 @@ export default function ComposePage() {
 
     try {
       if (!currentUser) {
-        console.log(currentUser);
+        // console.log(currentUser);
         Swal.fire({
           icon: "warning",
           title: "Please Login",
@@ -1313,7 +1312,7 @@ export default function ComposePage() {
       }
 
       if (currentUser.tokens <= 0) {
-        console.log("tokens =", currentUser.tokens);
+        // console.log("tokens =", currentUser.tokens);
         Swal.fire({
           icon: "warning",
           title: "Insufficient Tokens",
@@ -1345,7 +1344,6 @@ export default function ComposePage() {
         method: "POST",
         body: formData,
       });
-      console.log("Sending request...");
 
       if (!response.ok) {
         const text = await response.text();
@@ -1353,7 +1351,6 @@ export default function ComposePage() {
         setIsGenerating(false);
         return;
       }
-      console.log(response.status);
 
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
@@ -1362,11 +1359,11 @@ export default function ComposePage() {
       setAiGeneratedImage(url);
       // Keep selectedPhoto unchanged to maintain layout integrity
 
-      console.log("AI Generation completed:", {
-        aiImageUrl: url.substring(0, 50) + "...",
-        currentFrame: selectedFrame.id,
-        layoutInfo: layoutInfo,
-      });
+      // console.log("AI Generation completed:", {
+      //   aiImageUrl: url.substring(0, 50) + "...",
+      //   currentFrame: selectedFrame.id,
+      //   layoutInfo: layoutInfo,
+      // });
 
       // DON'T reset capturedPhotos - keep original layout structure
       // AI result will be handled in canvas drawing logic
@@ -1436,13 +1433,13 @@ export default function ComposePage() {
         skipCloudinaryUpload: false, // Ensure cloud upload for compose
       };
 
-      console.log("Saving to cloud with data:", {
-        shots: body.shots,
-        layout: body.layout,
-        imageSize: dataUrl.length,
-        hasAI: !!aiGeneratedImage,
-        frameId: selectedFrame.id,
-      });
+      // console.log("Saving to cloud with data:", {
+      //   shots: body.shots,
+      //   layout: body.layout,
+      //   imageSize: dataUrl.length,
+      //   hasAI: !!aiGeneratedImage,
+      //   frameId: selectedFrame.id,
+      // });
 
       const res = await fetch("/api/photos", {
         method: "POST",
@@ -1515,13 +1512,13 @@ export default function ComposePage() {
         skipCloudinaryUpload: false, // Ensure cloud upload for sharing
       };
 
-      console.log("Sharing to WhatsApp with data:", {
-        shots: body.shots,
-        layout: body.layout,
-        imageSize: dataUrl.length,
-        hasAI: !!aiGeneratedImage,
-        frameId: selectedFrame.id,
-      });
+      // console.log("Sharing to WhatsApp with data:", {
+      //   shots: body.shots,
+      //   layout: body.layout,
+      //   imageSize: dataUrl.length,
+      //   hasAI: !!aiGeneratedImage,
+      //   frameId: selectedFrame.id,
+      // });
 
       const res = await fetch("/api/photos", {
         method: "POST",
@@ -1818,7 +1815,7 @@ export default function ComposePage() {
                         // onClick={() => handleGenerateAI()}
                         disabled={false}
                         onClick={() => {
-                          console.log("BUTTON CLICK");
+                          // console.log("BUTTON CLICK");
                           handleGenerateAI();
                         }}
                         className={`w-full px-4 py-3 rounded-lg font-semibold border-2 transition-all shadow ${

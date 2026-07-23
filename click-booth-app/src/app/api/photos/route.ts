@@ -61,7 +61,7 @@ async function uploadBufferToCloudinary(
 async function findExistingPhoto(userId: string): Promise<Photo | null> {
   try {
     const userIdObj = userId ? new ObjectId(userId) : null;
-    console.log("Looking for existing photo for user:", userId);
+    // console.log("Looking for existing photo for user:", userId);
 
     const existingPhoto = await PhotoModel.collection().findOne({
       userId: userIdObj,
@@ -70,7 +70,7 @@ async function findExistingPhoto(userId: string): Promise<Photo | null> {
       createdAt: { $gte: new Date(Date.now() - 10 * 60 * 1000) },
     });
 
-    console.log("Found existing photo:", existingPhoto ? "Yes" : "No");
+    // console.log("Found existing photo:", existingPhoto ? "Yes" : "No");
     return existingPhoto as Photo | null;
   } catch (error) {
     console.warn("Error checking existing photo:", error);
@@ -115,9 +115,9 @@ export async function POST(req: Request) {
 
     // Check if we should skip Cloudinary upload (for booth photos)
     if (body.skipCloudinaryUpload) {
-      console.log(
-        "Skipping Cloudinary upload for booth photo, saving to DB only"
-      );
+      // console.log(
+      //   "Skipping Cloudinary upload for booth photo, saving to DB only"
+      // );
 
       // Save directly to database without Cloudinary upload
       const created = await PhotoModel.createPhoto({
@@ -180,7 +180,7 @@ export async function POST(req: Request) {
 
     // Cek apakah ini request untuk share WhatsApp dan sudah ada foto recent
     if (body.sendToWhatsapp) {
-      console.log("Processing WhatsApp share request");
+      // console.log("Processing WhatsApp share request");
       const existingPhoto = await findExistingPhoto(userId);
 
       if (existingPhoto && existingPhoto.url) {
@@ -188,10 +188,10 @@ export async function POST(req: Request) {
         url = existingPhoto.url;
         publicId = existingPhoto.publicId || "";
         created = existingPhoto;
-        console.log("Using existing photo for WhatsApp share:", url);
+        // console.log("Using existing photo for WhatsApp share:", url);
       } else {
         // Upload baru jika belum ada foto recent atau foto tidak valid
-        console.log("No existing photo found, uploading new for WhatsApp");
+        // console.log("No existing photo found, uploading new for WhatsApp");
         const uploadResult = await uploadBufferToCloudinary(buffer, {
           folder: "click-booth",
           resource_type: "image",
@@ -227,7 +227,7 @@ export async function POST(req: Request) {
       }
     } else {
       // Upload baru jika belum ada foto recent
-      console.log("No existing photo found, uploading new for cloud save");
+      // console.log("No existing photo found, uploading new for cloud save");
       const uploadResult = await uploadBufferToCloudinary(buffer, {
         folder: "click-booth",
         resource_type: "image",
@@ -258,7 +258,7 @@ export async function POST(req: Request) {
         aiEnhanced: false,
       });
       // Untuk save to cloud, cek dulu apakah sudah ada foto recent
-      console.log("Processing cloud save request");
+      // console.log("Processing cloud save request");
     }
 
     //share ke WhatsApp via fonnte

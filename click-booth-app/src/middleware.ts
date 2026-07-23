@@ -76,7 +76,7 @@ export default async function middleware(req: NextRequest) {
     }
 
     const userId = payload?.id ? String(payload.id) : "";
-    console.log("[middleware] userId:", userId);
+    // console.log("[middleware] userId:", userId);
 
     const roles = payload?.role;
     const isAdmin = roles === "admin";

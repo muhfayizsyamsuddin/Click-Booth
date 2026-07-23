@@ -8,7 +8,7 @@ import { UserModel } from "@/db/models/UserModel";
 export const POST = async (req: Request) => {
   try {
     const body = await req.json();
-    console.log("🚀 ~ POST ~ body:", body);
+    // console.log("🚀 ~ POST ~ body:", body);
 
     // Ambil order_id dari notifikasi Midtrans
     const orderId = body?.order_id;
@@ -22,7 +22,7 @@ export const POST = async (req: Request) => {
 
     // Cek status transaksi ke Midtrans (pakai CoreApi)
     const statusResponse = await coreClient.transaction.status(orderId);
-    console.log("Midtrans status response:", statusResponse);
+    // console.log("Midtrans status response:", statusResponse);
     // Mapping status Midtrans ke sistem kita
 
     let newStatus: "pending" | "success" | "failed" = "pending";

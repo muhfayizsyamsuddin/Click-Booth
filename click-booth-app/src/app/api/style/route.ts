@@ -78,7 +78,7 @@ export async function POST(req: Request) {
         }
       }
     }
-    console.log(imageWidth, imageHeight);
+    // console.log(imageWidth, imageHeight);
     const prompt = form.get("prompt") as string;
     const size = `${imageWidth}x${imageHeight}`; // ✅ sudah dinarrow ke union ---
     const mask = form.get("mask") as File | null;

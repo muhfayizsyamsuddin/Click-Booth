@@ -118,64 +118,6 @@ export default function PaymentPage() {
             )}&transaction_status=${trx}&fraud_status=${fraud}`
           );
         },
-        // onSuccess: async (result: unknown) => {
-        //   console.log("Payment success", result);
-        //   setVerifyingPayment(true);
-
-        //   // Manual verification - check payment status and update tokens
-        //   try {
-        //     // Check payment status via our API
-        //     const verifyRes = await fetch(`/api/payment/${orderId}`, {
-        //       method: "GET",
-        //     });
-
-        //     if (verifyRes.ok) {
-        //       const verifyData = await verifyRes.json();
-        //       if (verifyData.status === "success") {
-        //         alert(
-        //           "Payment successful! Tokens have been added to your account."
-        //         );
-        //         // Refresh the page to show updated token count
-        //         // window.location.reload();
-        //       } else {
-        //         alert(
-        //           "Payment is being processed. Tokens will be added shortly."
-        //         );
-        //       }
-        //     } else {
-        //       // Fallback: trigger manual verification
-        //       const notifyRes = await fetch("/api/payment/notify", {
-        //         method: "POST",
-        //         headers: { "Content-Type": "application/json" },
-        //         body: JSON.stringify({
-        //           order_id: orderId,
-        //           transaction_status: "settlement",
-        //           fraud_status: "accept",
-        //         }),
-        //       });
-
-        //       if (notifyRes.ok) {
-        //         alert(
-        //           "Payment successful! Tokens have been added to your account."
-        //         );
-        //         // window.location.reload();
-        //       } else {
-        //         alert(
-        //           "Payment successful! Please refresh the page to see your tokens."
-        //         );
-        //       }
-        //     }
-        //   } catch (error) {
-        //     console.error("Verification error:", error);
-        //     alert(
-        //       "Payment successful! Please refresh the page to see your tokens."
-        //     );
-        //   } finally {
-        //     setVerifyingPayment(false);
-        //   }
-
-        //   setShowPaymentModal(false);
-        // },
         onPending: (result: unknown) => {
           location.assign(
             `/payment/finish?order_id=${encodeURIComponent(

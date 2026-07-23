@@ -169,7 +169,7 @@ export default function AdminPage() {
       }
 
       const data = await response.json();
-      console.log(data.data);
+      // console.log(data.data);
 
       if (Array.isArray(data.data)) {
         setAiList(data.data);
@@ -177,7 +177,7 @@ export default function AdminPage() {
         setAiList([]);
       }
 
-      console.log("Fetched AI data:", data);
+      // console.log("Fetched AI data:", data);
     } catch (error) {
       console.error("Error fetching AI data:", error);
 
@@ -224,7 +224,7 @@ export default function AdminPage() {
 
         const uploadData = await uploadResponse.json();
         uploadedIconUrl = uploadData.res?.secure_url || uploadData.res?.url;
-        console.log("Image uploaded successfully:", uploadData);
+        // console.log("Image uploaded successfully:", uploadData);
       }
 
       // Then create the AI record with the uploaded icon URL
@@ -294,7 +294,7 @@ export default function AdminPage() {
         confirmButtonText: "Yes, delete it!",
       }).then(async (result) => {
         if (result.isConfirmed) {
-          console.log("Deleting AI with ID:", id);
+          // console.log("Deleting AI with ID:", id);
 
           const response = await fetch(`/api/admin/ai?id=${id}`, {
             method: "DELETE",
@@ -341,7 +341,7 @@ export default function AdminPage() {
 
         const uploadData = await uploadResponse.json();
         finalIconUrl = uploadData.res?.secure_url || uploadData.res?.url;
-        console.log("Image uploaded successfully:", uploadData);
+        // console.log("Image uploaded successfully:", uploadData);
       }
 
       const response = await fetch("/api/admin/ai", {
@@ -588,12 +588,12 @@ export default function AdminPage() {
     setMessage("");
 
     try {
-      console.log("Adding admin with data:", {
-        username: username.trim(),
-        phoneNumber: phoneNumber.trim(),
-        fullName: fullName.trim(),
-        email: email.trim(),
-      });
+      // console.log("Adding admin with data:", {
+      //   username: username.trim(),
+      //   phoneNumber: phoneNumber.trim(),
+      //   fullName: fullName.trim(),
+      //   email: email.trim(),
+      // });
 
       const response = await fetch("/api/admin/addadmin", {
         method: "POST",

@@ -98,11 +98,11 @@ export default function BoothPage() {
       const correctShotsCount = layoutData.shots || 1;
       setShotsCount(correctShotsCount);
 
-      console.log("Layout loaded:", {
-        layoutId: layoutData.id,
-        savedShots: layoutData.shots,
-        finalShotsCount: correctShotsCount
-      });
+      // console.log("Layout loaded:", {
+      //   layoutId: layoutData.id,
+      //   savedShots: layoutData.shots,
+      //   finalShotsCount: correctShotsCount
+      // });
     } catch (e) {
       console.warn("Failed to load saved layout:", e);
       router.push("/layout-selection");
@@ -310,7 +310,7 @@ export default function BoothPage() {
       while (tries < 4) {
         const last = capturedDataUrls[capturedDataUrls.length - 1] ?? null;
         if (!last || dataUrl !== last) {
-          console.log("Photo accepted after", tries, "tries");
+          // console.log("Photo accepted after", tries, "tries");
           break;
         }
         console.warn("Duplicate photo detected, retrying...", tries + 1);
@@ -337,13 +337,13 @@ export default function BoothPage() {
       const newCapturedPhotos = [...currentCaptured, dataUrl];
       setCapturedDataUrls(newCapturedPhotos);
 
-      console.log("Photo captured:", {
-        photoNumber: newCapturedPhotos.length,
-        totalExpected: shotsCount,
-        photoPreview: dataUrl.substring(0, 50) + "...",
-        isUnique: !currentCaptured.includes(dataUrl),
-        willTriggerCompose: newCapturedPhotos.length >= shotsCount
-      });
+      // console.log("Photo captured:", {
+      //   photoNumber: newCapturedPhotos.length,
+      //   totalExpected: shotsCount,
+      //   photoPreview: dataUrl.substring(0, 50) + "...",
+      //   isUnique: !currentCaptured.includes(dataUrl),
+      //   willTriggerCompose: newCapturedPhotos.length >= shotsCount
+      // });
 
       setPreviewCaptured(dataUrl);
       setFinalComposed(false);
@@ -371,17 +371,17 @@ export default function BoothPage() {
 
     // Prevent multiple calls to composeFinal
     if (finalComposed) {
-      console.log("composeFinal already called, skipping");
+      // console.log("composeFinal already called, skipping");
       return;
     }
 
     const imgs = (imgsOverride ?? capturedDataUrls).slice(0, shotsCount);
-    console.log("composeFinal called with:", {
-      imageCount: imgs.length,
-      expectedShots: shotsCount,
-      selectedLayout: selectedLayout,
-      imageSources: imgs.map((img, i) => `${i}: ${img.substring(0, 50)}...`)
-    });
+    // console.log("composeFinal called with:", {
+    //   imageCount: imgs.length,
+    //   expectedShots: shotsCount,
+    //   selectedLayout: selectedLayout,
+    //   imageSources: imgs.map((img, i) => `${i}: ${img.substring(0, 50)}...`)
+    // });
 
     if (imgs.length === 0) return;
 
@@ -429,12 +429,12 @@ export default function BoothPage() {
         finalImage: finalImage
       };
 
-      console.log("Saving to sessionStorage:", {
-        imageCount: imagesToSave.length,
-        expectedShots: shotsCount,
-        layout: selectedLayout,
-        imagePreviews: imagesToSave.map((img, i) => `${i}: ${img.substring(0, 50)}...`)
-      });
+      // console.log("Saving to sessionStorage:", {
+      //   imageCount: imagesToSave.length,
+      //   expectedShots: shotsCount,
+      //   layout: selectedLayout,
+      //   imagePreviews: imagesToSave.map((img, i) => `${i}: ${img.substring(0, 50)}...`)
+      // });
 
       sessionStorage.setItem("composePayload", JSON.stringify(payload));
     } catch (e) {
@@ -446,7 +446,7 @@ export default function BoothPage() {
   async function autoSavePhoto(canvas: HTMLCanvasElement, imagesArray?: string[]) {
     // Prevent double uploads
     if (savedPhotoId) {
-      console.log("Photo already saved, skipping duplicate upload");
+      // console.log("Photo already saved, skipping duplicate upload");
       return;
     }
 
@@ -455,13 +455,13 @@ export default function BoothPage() {
       // Use provided images array or fallback to capturedDataUrls
       const imagesToSave = imagesArray || capturedDataUrls.slice(0, shotsCount);
 
-      console.log("Auto-saving photo with data:", {
-        totalCaptured: capturedDataUrls.length,
-        expectedShots: shotsCount,
-        imagesToSave: imagesToSave.length,
-        layout: selectedLayout,
-        usingProvidedArray: !!imagesArray
-      });
+      // console.log("Auto-saving photo with data:", {
+      //   totalCaptured: capturedDataUrls.length,
+      //   expectedShots: shotsCount,
+      //   imagesToSave: imagesToSave.length,
+      //   layout: selectedLayout,
+      //   usingProvidedArray: !!imagesArray
+      // });
 
       const body = {
         imageData: dataUrl,
@@ -486,7 +486,7 @@ export default function BoothPage() {
         const data = await res.json();
         if (data.photo?._id) {
           setSavedPhotoId(data.photo._id);
-          console.log("Photo auto-saved with ID:", data.photo._id);
+          // console.log("Photo auto-saved with ID:", data.photo._id);
         }
       }
     } catch (e) {
