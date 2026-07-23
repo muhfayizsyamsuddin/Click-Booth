@@ -1814,8 +1814,13 @@ export default function ComposePage() {
                       )}
 
                       <button
-                        disabled={!selectedPhoto || !aiPrompt || isGenerating}
-                        onClick={() => handleGenerateAI()}
+                        // disabled={!selectedPhoto || !aiPrompt || isGenerating}
+                        // onClick={() => handleGenerateAI()}
+                        disabled={false}
+                        onClick={() => {
+                          console.log("BUTTON CLICK");
+                          handleGenerateAI();
+                        }}
                         className={`w-full px-4 py-3 rounded-lg font-semibold border-2 transition-all shadow ${
                           isGenerating
                             ? "bg-gray-200 text-gray-600 border-gray-300 cursor-not-allowed"
